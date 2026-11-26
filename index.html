@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="theme-color" content="#e7fbf1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Privacy WA — Chat Blur, PIN Lock & Quick Reply for WhatsApp Web</title>
   <meta name="description" content="Blur sensitive chats, contacts & media on WhatsApp Web, lock with Alt+X Panic Shield or Local PIN, track orders, and reply 10x faster. 100% local & free Chrome extension." />
@@ -90,9 +91,144 @@
     }
     .nav-links { display: flex; align-items: center; gap: 26px; color: var(--muted); font-size: 0.92rem; font-weight: 600; }
     .nav-links a:hover { color: #fff; }
-    .nav-live-dot {
-      display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-      background: var(--neon); margin-right: 6px; box-shadow: 0 0 10px var(--neon);
+    /* Live indicator: blinking green dot with expanding glow ring */
+    .live-dot {
+      position: relative; display: inline-block; flex-shrink: 0;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 6px var(--neon), 0 0 14px rgba(16, 232, 120, 0.65);
+      animation: liveBlink 1.4s ease-in-out infinite;
+    }
+    .live-dot::after {
+      content: ""; position: absolute; inset: 0; border-radius: 50%;
+      background: var(--neon); opacity: 0.55;
+      animation: liveRing 1.4s ease-out infinite;
+    }
+    .nav-live-dot { margin-right: 8px; vertical-align: middle; }
+    @keyframes liveBlink {
+      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--neon), 0 0 16px rgba(16, 232, 120, 0.75); }
+      50% { opacity: 0.35; box-shadow: 0 0 2px var(--neon), 0 0 6px rgba(16, 232, 120, 0.3); }
+    }
+    @keyframes liveRing {
+      0% { transform: scale(1); opacity: 0.55; }
+      100% { transform: scale(3.2); opacity: 0; }
+    }
+
+    /* LIVE badge — solid, crisp */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 5px 12px 5px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em;
+      color: #04140b; background: #22ff8b;
+      border: 1px solid #22ff8b;
+    }
+    .live-badge .live-dot { background: #04140b; box-shadow: none; animation: liveBlinkSolid 1.2s ease-in-out infinite; }
+    .live-badge .live-dot::after { display: none; }
+    @keyframes liveBlinkSolid { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+    /* Shield status pill — solid colors, no haze */
+    .status-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 4px 11px 4px 10px; border-radius: 999px;
+      font-size: 0.72rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #04140b; background: #22ff8b; border: 1px solid #22ff8b;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+    .status-pill .live-dot { background: #04140b; box-shadow: none; animation: liveBlinkSolid 1.2s ease-in-out infinite; }
+    .status-pill .live-dot::after { display: none; }
+    .status-pill.warn { color: #1a0f00; background: #fbbf24; border-color: #fbbf24; }
+    .status-pill.warn .live-dot { background: #1a0f00; }
+    .status-pill.locked { color: #fff; background: #f43f5e; border-color: #f43f5e; }
+    .status-pill.locked .live-dot { background: #fff; }
+
+    /* Result card — solid dark surface, bright crisp text */
+    .sim-result {
+      padding: 16px; border-radius: 14px;
+      background: #0a1a12; border: 1.5px solid #22ff8b;
+    }
+    .sim-result-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .sim-result-label { font-size: 0.72rem; color: #9fb3a8; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+    .sim-result-value { font-size: 1rem; font-weight: 800; color: #ffffff; margin-top: 3px; }
+    .sim-result-score { font-size: 1.9rem; font-weight: 900; color: #22ff8b; line-height: 1; font-variant-numeric: tabular-nums; }
+    .sim-bar { height: 8px; border-radius: 999px; background: #1c2e25; margin-top: 14px; overflow: hidden; }
+    .sim-bar-fill { height: 100%; width: 67%; border-radius: 999px; background: #22ff8b; transition: width 0.35s ease, background 0.25s; }
+    .sim-result.low { border-color: #fbbf24; }
+    .sim-result.low .sim-result-score { color: #fbbf24; }
+    .sim-result.low .sim-bar-fill { background: #fbbf24; }
+    .sim-result.locked { border-color: #f43f5e; }
+    .sim-result.locked .sim-result-score { color: #ff5c78; }
+    .sim-result.locked .sim-bar-fill { background: #f43f5e; }
+
+    /* ===== 3D LOOK (solid, crisp extrusion) ===== */
+    .sim-panel { perspective: 900px; }
+
+    /* 3D sphere dot */
+    .live-dot {
+      background: radial-gradient(circle at 32% 28%, #eafff3 0 14%, #22ff8b 38%, #06a553 100%);
+    }
+    .live-badge .live-dot, .status-pill .live-dot {
+      background: radial-gradient(circle at 32% 28%, #ffffff 0 16%, #1fdc78 40%, #04140b 100%);
+    }
+
+    /* 3D pill buttons: raised with a solid bottom edge */
+    .live-badge, .status-pill {
+      --edge: #0a8a46;
+      background: linear-gradient(180deg, #5dffb0 0%, #22ff8b 50%, #12d46f 100%);
+      border: 0; border-top: 1px solid #b6ffd8;
+      box-shadow: 0 3px 0 var(--edge), 0 6px 10px rgba(0, 0, 0, 0.55);
+      transform: translateY(-1px);
+    }
+    .status-pill.warn { --edge: #a86a00; background: linear-gradient(180deg, #ffd873 0%, #fbbf24 55%, #e49b0a 100%); border-top-color: #ffeaa8; }
+    .status-pill.locked { --edge: #a3122e; background: linear-gradient(180deg, #ff7d92 0%, #f43f5e 55%, #d02548 100%); border-top-color: #ffb3c0; }
+
+    /* 3D result card: thick extruded base + tilt on hover */
+    .sim-result {
+      --edge: #0a8a46;
+      position: relative; transform-style: preserve-3d;
+      background: linear-gradient(160deg, #143a27 0%, #0a1f15 55%, #06120c 100%);
+      border: 1.5px solid #22ff8b; border-top-color: #7dffbc;
+      box-shadow:
+        0 1px 0 #7dffbc inset,
+        0 6px 0 var(--edge),
+        0 8px 0 #04140b,
+        0 22px 34px rgba(0, 0, 0, 0.65);
+      transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+      transition: transform 0.15s ease-out, box-shadow 0.25s, border-color 0.25s;
+      margin-bottom: 8px;
+    }
+    .sim-result.low { --edge: #a86a00; border-top-color: #ffe08a; }
+    .sim-result.locked { --edge: #a3122e; border-top-color: #ff9aac; }
+    .sim-result-label { transform: translateZ(10px); }
+    .sim-result-value { transform: translateZ(18px); }
+
+    /* extruded score digits */
+    .sim-result-score {
+      transform: translateZ(34px);
+      color: #4dffa4;
+      text-shadow: 1px 1px 0 #0fc468, 2px 2px 0 #0a9d51, 3px 3px 0 #077a3e, 4px 4px 0 #055f31, 6px 8px 10px rgba(0, 0, 0, 0.6);
+    }
+    .sim-result.low .sim-result-score { color: #ffd05a; text-shadow: 1px 1px 0 #e6a40f, 2px 2px 0 #bd820a, 3px 3px 0 #946500, 4px 4px 0 #6f4b00, 6px 8px 10px rgba(0, 0, 0, 0.6); }
+    .sim-result.locked .sim-result-score { color: #ff7d92; text-shadow: 1px 1px 0 #e2395a, 2px 2px 0 #b92a47, 3px 3px 0 #911f37, 4px 4px 0 #6d1628, 6px 8px 10px rgba(0, 0, 0, 0.6); }
+
+    /* 3D tube progress bar: inset track + glossy fill */
+    .sim-bar {
+      height: 14px; background: linear-gradient(180deg, #050d09, #12261b);
+      box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.8), 0 1px 0 rgba(255, 255, 255, 0.12);
+      transform: translateZ(14px);
+    }
+    .sim-bar-fill {
+      background: linear-gradient(180deg, #a6ffd0 0%, #22ff8b 35%, #0fb35c 100%);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25) inset;
+    }
+    .sim-result.low .sim-bar-fill { background: linear-gradient(180deg, #ffe9a6 0%, #fbbf24 35%, #c98500 100%); }
+    .sim-result.locked .sim-bar-fill { background: linear-gradient(180deg, #ffc0cb 0%, #f43f5e 35%, #b81e3d 100%); }
+
+    .live-badge, .status-pill { white-space: nowrap; flex-shrink: 0; line-height: 1.2; }
+    .status-pill { font-size: 0.62rem; padding: 3px 9px 3px 8px; gap: 6px; letter-spacing: 0.06em; }
+    .wa-sidebar .wa-top { gap: 8px; font-size: 0.82rem; }
+    @media (prefers-reduced-motion: reduce) {
+      .live-dot, .live-dot::after { animation: none; }
+      .sim-result { transform: none !important; }
     }
 
     /* Neon Buttons */
@@ -501,6 +637,205 @@
       .wa-mock { grid-template-columns: 1fr; }
       .wa-sidebar { display: none; }
     }
+  
+    /* =====================================================
+       LIGHT MINT + 3D THEME  (overrides everything above)
+       ===================================================== */
+    :root {
+      --bg: #ffffff;
+      --bg-card: #ffffff;
+      --border: #cdeedd;
+      --border-strong: #5ad79a;
+      --text: #0f172a;
+      --muted: #526071;
+      --neon: #0a9a50;
+      --neon-soft: #0a9a50;
+      --cyan: #0891b2;
+      --shadow: 0 22px 40px rgba(15, 80, 50, 0.18);
+      --ink: #0f172a;
+      --g-hi: #5df0a5; --g: #16c768; --g-edge: #0a8f48;
+      --card-edge: #b4e3cc;
+    }
+    body { color: var(--ink); background: linear-gradient(180deg, #e7fbf1 0%, #f3fdf8 28%, #ffffff 62%) fixed; }
+    .bg-grid {
+      background-image: linear-gradient(rgba(16, 180, 100, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 180, 100, 0.07) 1px, transparent 1px);
+    }
+    .bg-glow {
+      background: radial-gradient(700px circle at 50% -10%, rgba(34, 255, 139, 0.22), transparent 60%),
+                  radial-gradient(500px circle at 8% 40%, rgba(6, 182, 212, 0.08), transparent 60%),
+                  radial-gradient(600px circle at 92% 80%, rgba(34, 255, 139, 0.1), transparent 65%);
+    }
+
+    /* Nav */
+    .nav-wrap { background: rgba(255, 255, 255, 0.85); border-bottom: 1px solid #d5eee2; }
+    .nav-links { color: var(--muted); }
+    .nav-links a:hover { color: var(--ink); }
+    .brand-icon {
+      background: linear-gradient(180deg, #ffffff, #e3f9ee); border: 1px solid #bff3d9; color: #0a8f48;
+      box-shadow: 0 3px 0 var(--card-edge), 0 8px 12px rgba(15, 80, 50, 0.15);
+    }
+    .brand-badge { background: #e3f9ee; color: #0a8f48; border: 1px solid #bff3d9; box-shadow: 0 2px 0 #bfe6d2; }
+
+    /* 3D buttons */
+    .btn { transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s; }
+    .btn-primary {
+      background: linear-gradient(180deg, var(--g-hi), var(--g) 60%, #0fb25c); color: #03280f;
+      border-top: 1px solid #c9ffe2;
+      box-shadow: 0 5px 0 var(--g-edge), 0 14px 20px rgba(10, 143, 72, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--g-edge), 0 18px 26px rgba(10, 143, 72, 0.35); }
+    .btn-primary:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--g-edge), 0 4px 8px rgba(10, 143, 72, 0.3); }
+    .btn-secondary {
+      background: linear-gradient(180deg, #ffffff, #eefaf4); color: var(--ink); border-color: #cdeedd;
+      box-shadow: 0 5px 0 var(--card-edge), 0 12px 16px rgba(15, 80, 50, 0.1);
+    }
+    .btn-secondary:hover { background: linear-gradient(180deg, #ffffff, #e3f9ee); border-color: #8fe3b9; transform: translateY(-2px); }
+    .btn-secondary:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--card-edge); }
+
+    /* Hero */
+    .pill {
+      background: linear-gradient(180deg, #ffffff, #e9fbf2); border: 1px solid #bff3d9; color: #0a7a40;
+      box-shadow: 0 3px 0 var(--card-edge), 0 8px 14px rgba(15, 80, 50, 0.1);
+    }
+    .pill-dot { background: radial-gradient(circle at 32% 28%, #fff 0 16%, #1fdc78 42%, #06a553 100%); box-shadow: 0 0 8px rgba(22, 199, 104, 0.7); }
+    .neon-text {
+      background: linear-gradient(135deg, #0fb25c 0%, #08a060 50%, #0891b2 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 3px 0 rgba(6, 122, 60, 0.22));
+    }
+    .hero-sub { color: #475569; }
+    .kbd {
+      color: #0a7a40; background: linear-gradient(180deg, #fff, #eefaf4); border: 1px solid #bff3d9;
+      box-shadow: 0 3px 0 var(--card-edge);
+    }
+    .trust-row { color: var(--muted); }
+    .trust-row svg { color: #0a9a50; }
+    .sec-eyebrow { color: #0a8f48; }
+    strong[style*="#fff"] { color: var(--ink) !important; }
+    span[style*="#38bdf8"] { color: #0284c7 !important; }
+    span[style*="#fbbf24"] { color: #b45309 !important; }
+
+    /* Video / browser frame */
+    .browser-frame {
+      background: #ffffff; border: 1px solid #cdeedd;
+      box-shadow: 0 9px 0 #9fe6c2, 0 11px 0 #7fd3a8, 0 36px 60px rgba(15, 80, 50, 0.22);
+    }
+    .browser-bar { background: linear-gradient(180deg, #f6fdf9, #e9f7f0); border-bottom: 1px solid #d5eee2; }
+    .url-bar { background: #fff; border: 1px solid #d5eee2; color: var(--muted); box-shadow: inset 0 2px 3px rgba(15, 80, 50, 0.08); }
+    .video-footer { background: #f6fdf9; border-top: 1px solid #d5eee2; color: var(--muted); }
+
+    /* Simulator */
+    .sim-panel {
+      background: linear-gradient(160deg, #ffffff, #f4fdf8); border: 1px solid #cdeedd; backdrop-filter: none;
+      box-shadow: 0 8px 0 #9fe6c2, 0 10px 0 #7fd3a8, 0 28px 44px rgba(15, 80, 50, 0.18);
+    }
+    .toggle-item {
+      background: linear-gradient(180deg, #ffffff, #eefaf4); border: 1px solid #d5eee2;
+      box-shadow: 0 3px 0 #bfe6d2, 0 8px 12px rgba(15, 80, 50, 0.08);
+      transition: transform 0.12s, box-shadow 0.12s, border-color 0.2s;
+    }
+    .toggle-item:hover { border-color: #5ad79a; background: linear-gradient(180deg, #fff, #e6faf0); }
+    .toggle-item:active { transform: translateY(2px); box-shadow: 0 1px 0 #bfe6d2; }
+    .toggle-item small { color: #6b7a8a; }
+    .switch { background: #cbd5e1; box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.25); }
+    .switch::after { box-shadow: 0 2px 3px rgba(0, 0, 0, 0.3); }
+    .toggle-item.active .switch { background: linear-gradient(180deg, #5df0a5, #16c768); box-shadow: inset 0 2px 3px rgba(6, 90, 47, 0.3); }
+    .toggle-item.active .switch::after { background: #ffffff; }
+    .panic-btn {
+      background: linear-gradient(180deg, #fff5f6, #ffe3e8); border: 1px solid #ffc2cc; color: #c81e45;
+      box-shadow: 0 4px 0 #f3a5b3, 0 10px 14px rgba(200, 30, 69, 0.12);
+    }
+    .panic-btn:hover { background: linear-gradient(180deg, #fff, #ffd9df); }
+    .panic-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #f3a5b3; }
+
+    /* Light result card */
+    .sim-result {
+      --edge: #9fe6c2;
+      background: linear-gradient(160deg, #ffffff 0%, #f1fdf7 100%);
+      border: 1.5px solid #bff3d9; border-top-color: #ffffff;
+      box-shadow: 0 2px 0 #fff inset, 0 7px 0 var(--edge), 0 9px 0 #7fd3a8, 0 24px 34px rgba(15, 80, 50, 0.2);
+    }
+    .sim-result.low { --edge: #f3d58a; border-color: #fde3a1; box-shadow: 0 2px 0 #fff inset, 0 7px 0 var(--edge), 0 9px 0 #e0b24a, 0 24px 34px rgba(150, 100, 10, 0.18); }
+    .sim-result.locked { --edge: #f5a7b5; border-color: #ffc2cc; box-shadow: 0 2px 0 #fff inset, 0 7px 0 var(--edge), 0 9px 0 #e0788c, 0 24px 34px rgba(170, 30, 60, 0.18); }
+    .sim-result-label { color: #6b7a8a; }
+    .sim-result-value { color: var(--ink); }
+    .sim-bar { background: linear-gradient(180deg, #cfe9dc, #e8f6ee); box-shadow: inset 0 4px 6px rgba(15, 80, 50, 0.25), 0 1px 0 #fff; }
+    .sim-result-score { color: #3be88f; text-shadow: 1px 1px 0 #19c46b, 2px 2px 0 #12a458, 3px 3px 0 #0d8847, 4px 4px 0 #086d38, 6px 9px 10px rgba(6, 90, 47, 0.3); }
+    .sim-result.low .sim-result-score { text-shadow: 1px 1px 0 #e6a40f, 2px 2px 0 #bd820a, 3px 3px 0 #946500, 4px 4px 0 #6f4b00, 6px 9px 10px rgba(111, 75, 0, 0.3); }
+    .sim-result.locked .sim-result-score { text-shadow: 1px 1px 0 #e2395a, 2px 2px 0 #b92a47, 3px 3px 0 #911f37, 4px 4px 0 #6d1628, 6px 9px 10px rgba(109, 22, 40, 0.3); }
+
+    /* WhatsApp mock stays dark (it's WhatsApp dark mode) but gets a 3D frame */
+    .wa-mock {
+      color: #f8fafc; --neon: #22ff8b; --muted: #94a3b8; border: 1px solid #0b2a1c;
+      box-shadow: 0 9px 0 #0f3a27, 0 11px 0 #0a2a1c, 0 34px 52px rgba(15, 80, 50, 0.35);
+    }
+
+    /* Feature / step / review cards */
+    .s-card {
+      background: linear-gradient(160deg, #ffffff, #f4fdf8); border: 1px solid #d5eee2;
+      box-shadow: 0 6px 0 var(--card-edge), 0 8px 0 #96d6b6, 0 20px 30px rgba(15, 80, 50, 0.1);
+    }
+    .s-card::before { background: radial-gradient(380px circle at var(--mx) var(--my), rgba(34, 255, 139, 0.2), transparent 55%); }
+    .s-card:hover { transform: translateY(-8px); border-color: #5ad79a; box-shadow: 0 12px 0 #9fe6c2, 0 14px 0 #6fcb9b, 0 34px 44px rgba(15, 80, 50, 0.2); }
+    .card-icon {
+      background: linear-gradient(180deg, #ffffff, #e3f9ee); color: #0a8f48; border: 1px solid #bff3d9;
+      box-shadow: 0 4px 0 var(--card-edge), 0 8px 12px rgba(15, 80, 50, 0.12);
+    }
+    .s-card:hover .card-icon { background: linear-gradient(180deg, var(--g-hi), var(--g)); color: #03280f; box-shadow: 0 4px 0 var(--g-edge), 0 10px 16px rgba(10, 143, 72, 0.3); }
+    .card-cta { color: #0a8f48; }
+    .rev-name { color: var(--ink); }
+    .rev-quote { color: #475569; }
+    .rev-quote::before { color: #16c768; }
+    .rev-avatar { box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18), 0 10px 14px rgba(15, 23, 42, 0.18); }
+    .rev-stars { color: #f59e0b; }
+
+    /* Use cases */
+    .uc-tab-btn { background: linear-gradient(180deg, #fff, #eefaf4); color: var(--muted); border: 1px solid #d5eee2; box-shadow: 0 4px 0 var(--card-edge); transition: transform 0.12s, box-shadow 0.12s, color 0.2s; }
+    .uc-tab-btn:hover { color: var(--ink); border-color: #5ad79a; }
+    .uc-tab-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--card-edge); }
+    .uc-tab-btn.active { background: linear-gradient(180deg, var(--g-hi), var(--g)); color: #03280f; border-color: #16c768; box-shadow: 0 4px 0 var(--g-edge), 0 10px 16px rgba(10, 143, 72, 0.25); transform: translateY(-1px); }
+    .uc-box {
+      background: linear-gradient(160deg, #ffffff, #f4fdf8); border: 1px solid #cdeedd;
+      box-shadow: 0 8px 0 #9fe6c2, 0 10px 0 #7fd3a8, 0 28px 44px rgba(15, 80, 50, 0.16);
+    }
+    .uc-box h3 { color: var(--ink); }
+    .uc-list li { color: #334155; }
+    .uc-list li::before { color: #0a9a50; }
+    .uc-visual { background: linear-gradient(145deg, #e3f9ee, #ffffff 70%); border: 1px solid #bff3d9; box-shadow: inset 0 3px 8px rgba(15, 80, 50, 0.08); }
+    .uc-badge { background: linear-gradient(180deg, var(--g-hi), var(--g)); color: #03280f; border: 0; border-top: 1px solid #c9ffe2; box-shadow: 0 3px 0 var(--g-edge), 0 8px 12px rgba(10, 143, 72, 0.22); }
+    .uc-row { background: linear-gradient(180deg, #fff, #f1fbf6); border: 1px solid #d5eee2; color: var(--ink); box-shadow: 0 3px 0 #cfeadc; }
+
+    /* Table */
+    .table-wrap { background: #fff; border: 1px solid #cdeedd; box-shadow: 0 7px 0 #9fe6c2, 0 9px 0 #7fd3a8, 0 24px 36px rgba(15, 80, 50, 0.14); }
+    th, td { border-bottom: 1px solid #e1f2ea; color: #334155; }
+    th { background: #f1fbf6; color: var(--ink); }
+    td:nth-child(2) { color: #0a7a40; background: #f1fcf6; }
+
+    /* FAQ */
+    .faq-item { background: linear-gradient(180deg, #fff, #f6fdf9); border: 1px solid #d5eee2; box-shadow: 0 4px 0 var(--card-edge), 0 10px 14px rgba(15, 80, 50, 0.07); }
+    .faq-item.open { border-color: #5ad79a; box-shadow: 0 5px 0 #9fe6c2, 0 14px 20px rgba(15, 80, 50, 0.12); }
+    .faq-q { color: var(--ink); }
+    .faq-q svg { color: #0a9a50; }
+    .faq-a { color: var(--muted); }
+
+    /* CTA */
+    .cta-box {
+      background: linear-gradient(135deg, #dffbec 0%, #f3fdf8 60%, #ffffff 100%); border: 1px solid #9fe6c2;
+      box-shadow: 0 10px 0 #9fe6c2, 0 12px 0 #6fcb9b, 0 38px 60px rgba(15, 80, 50, 0.22);
+    }
+    .cta-box p { color: #475569; }
+
+    /* Modal */
+    .modal-backdrop { background: rgba(10, 40, 26, 0.45); }
+    .modal-card { background: #ffffff; border: 1px solid #9fe6c2; box-shadow: 0 10px 0 #9fe6c2, 0 12px 0 #6fcb9b, 0 44px 80px rgba(0, 0, 0, 0.3); }
+    .modal-close { background: #f1fbf6; border: 1px solid #cdeedd; color: var(--ink); box-shadow: 0 3px 0 var(--card-edge); }
+    .modal-close:hover { background: #ffe3e8; border-color: #ffc2cc; }
+    .modal-list li { color: #334155; background: #f6fdf9; border: 1px solid #d5eee2; box-shadow: 0 2px 0 #d5eee2; }
+    .modal-list li::before { color: #0a9a50; }
+
+    /* Footer */
+    footer { border-top: 1px solid #d5eee2; color: var(--muted); background: rgba(255, 255, 255, 0.6); }
+    .footer-links a:hover { color: #0a8f48; }
   </style>
 </head>
 <body>
@@ -520,7 +855,7 @@
         </a>
         <div class="nav-links">
           <a href="#demo">Video Tour</a>
-          <a href="#simulator"><span class="nav-live-dot"></span>Live Simulator</a>
+          <a href="#simulator"><span class="live-dot nav-live-dot"></span>Live Simulator</a>
           <a href="#features">Features</a>
           <a href="#reviews">Reviews</a>
           <a href="#use-cases">Use Cases</a>
@@ -607,7 +942,7 @@
         <div class="sim-panel">
           <h3>
             <span>Privacy WA Controls</span>
-            <span class="brand-badge">LIVE</span>
+            <span class="live-badge"><span class="live-dot"></span>LIVE</span>
           </h3>
           <div class="toggle-item active" data-toggle="blur-msgs">
             <div><span>Blur Messages &amp; Previews</span><small>Hover any bubble to reveal</small></div>
@@ -621,6 +956,16 @@
             <div><span>Blur Profile Photos</span><small>Mask avatars in sidebar</small></div>
             <div class="switch"></div>
           </div>
+          <div class="sim-result" id="simResult" aria-live="polite">
+            <div class="sim-result-top">
+              <div>
+                <div class="sim-result-label">Live Result</div>
+                <div class="sim-result-value" id="simResultText">2 of 3 protections active</div>
+              </div>
+              <div class="sim-result-score" id="simResultScore">67%</div>
+            </div>
+            <div class="sim-bar"><div class="sim-bar-fill" id="simBarFill"></div></div>
+          </div>
           <button class="panic-btn" id="triggerPanic" type="button">
             🔒 Trigger Panic Shield (Alt + X)
           </button>
@@ -630,7 +975,7 @@
           <div class="wa-sidebar">
             <div class="wa-top">
               <span>WhatsApp Web</span>
-              <span style="color:var(--neon); font-size:0.75rem;">● Shield ON</span>
+              <span class="status-pill" id="shieldStatus"><span class="live-dot"></span><span id="shieldText">Shield ON</span></span>
             </div>
             <div class="wa-chat-item selected">
               <div class="wa-avatar" style="background:#059669;">SA</div>
@@ -1051,8 +1396,42 @@
       item.addEventListener('click', () => {
         item.classList.toggle('active');
         waMock.classList.toggle(item.dataset.toggle);
+        updateShieldStatus();
       });
     });
+
+    // Live status: shield pill + result strip follow the real simulator state
+    const shieldStatus = document.getElementById('shieldStatus');
+    const shieldText = document.getElementById('shieldText');
+    const simResult = document.getElementById('simResult');
+    const simResultText = document.getElementById('simResultText');
+    const simResultScore = document.getElementById('simResultScore');
+    // 3D tilt on the result card
+    simResult.addEventListener('pointermove', e => {
+      const r = simResult.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      simResult.style.setProperty('--ry', (px * 14).toFixed(1) + 'deg');
+      simResult.style.setProperty('--rx', (-py * 14).toFixed(1) + 'deg');
+    });
+    simResult.addEventListener('pointerleave', () => {
+      simResult.style.setProperty('--rx', '0deg');
+      simResult.style.setProperty('--ry', '0deg');
+    });
+    function updateShieldStatus() {
+      const total = document.querySelectorAll('.toggle-item').length;
+      const on = document.querySelectorAll('.toggle-item.active').length;
+      const locked = document.getElementById('pinOverlay').classList.contains('open');
+      shieldStatus.classList.toggle('locked', locked);
+      shieldStatus.classList.toggle('warn', !locked && on === 0);
+      shieldText.textContent = locked ? 'Locked' : (on === 0 ? 'Shield OFF' : 'Shield ON');
+      simResultText.textContent = locked ? 'Screen fully locked by PIN'
+        : (on === total ? 'All protections active' : on + ' of ' + total + ' protections active');
+      simResultScore.textContent = locked ? '100%' : Math.round((on / total) * 100) + '%';
+      simResult.classList.toggle('low', !locked && on < 2);
+      simResult.classList.toggle('locked', locked);
+      document.getElementById('simBarFill').style.width = (locked ? 100 : Math.round((on / total) * 100)) + '%';
+    }
 
     const waMessages = document.getElementById('waMessages');
     document.querySelectorAll('.qr-chip').forEach(btn => {
@@ -1075,6 +1454,7 @@
 
     function openPanicShield() {
       pinOverlay.classList.add('open');
+      updateShieldStatus();
       pinError.textContent = '';
       pinInput.value = '';
       setTimeout(() => pinInput.focus(), 60);
@@ -1082,6 +1462,7 @@
     function tryUnlock() {
       if (pinInput.value.trim() === '1234') {
         pinOverlay.classList.remove('open');
+        updateShieldStatus();
         pinError.textContent = '';
       } else {
         pinError.textContent = 'Wrong PIN! Try demo PIN: 1234';
@@ -1096,7 +1477,7 @@
     window.addEventListener('keydown', e => {
       if (e.altKey && e.key.toLowerCase() === 'x') {
         e.preventDefault();
-        pinOverlay.classList.contains('open') ? pinOverlay.classList.remove('open') : openPanicShield();
+        if (pinOverlay.classList.contains('open')) { pinOverlay.classList.remove('open'); updateShieldStatus(); } else { openPanicShield(); }
       }
       if (e.key === 'Escape') {
         document.getElementById('featureModal').classList.remove('open');
