@@ -1,1066 +1,1582 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Privacy WA — Chat Blur, PIN Lock & Quick Reply for WhatsApp Web</title>
-  <meta name="description" content="Instant WhatsApp Web privacy blur with Alt+X panic shield, local PIN lock, order status tracking, chat notes, and 1-click quick replies. 100% local & free Chrome extension." />
-  <meta property="og:title" content="Privacy WA — Chat Blur & Quick Reply for WhatsApp Web" />
-  <meta property="og:description" content="Blur sensitive chats, contacts & media on WhatsApp Web, lock with Alt+X or PIN, and reply in 1 click. Zero servers, 100% local." />
-  <meta property="og:url" content="https://privacywa.tronbusiness.shop" />
-  <meta property="og:type" content="website" />
+  <title>Privacy WA - Chat Blur &amp; Quick Reply (v1.2.3) | Official Extension by Tron Business</title>
+  <meta name="description" content="Instant WhatsApp Web privacy blur with Alt+X panic shortcut, Local PIN Lock, 1-click quick replies, and order/chat notes. 100% local storage & zero data collection." />
+  <meta name="theme-color" content="#060B0E" />
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: {
+              950: '#060B0E',
+              900: '#091116',
+              850: '#0C151A',
+              800: '#101D24',
+              700: '#172832',
+            },
+            wa: {
+              DEFAULT: '#25D366',
+              light: '#4ADE80',
+              dark: '#16A34A',
+              teal: '#10B981',
+            }
+          },
+          animation: {
+            'pulse-slow': 'pulseSlow 6s ease-in-out infinite',
+            'float': 'floatSlow 5s ease-in-out infinite',
+            'border-beam': 'borderBeam 4s linear infinite',
+          },
+          keyframes: {
+            pulseSlow: {
+              '0%, 100%': { opacity: '0.35', transform: 'scale(1)' },
+              '50%': { opacity: '0.6', transform: 'scale(1.06)' },
+            },
+            floatSlow: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-6px)' },
+            }
+          }
+        }
+      }
+    };
+  </script>
+
   <style>
     :root {
-      --bg: #070b12;
-      --bg-soft: #0c121e;
-      --card: rgba(17, 25, 40, 0.72);
-      --border: rgba(255, 255, 255, 0.08);
-      --border-strong: rgba(16, 185, 129, 0.45);
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --emerald: #10b981;
-      --emerald-bright: #34d399;
-      --cyan: #06b6d4;
-      --wa-green: #25d366;
-      --danger: #f43f5e;
-      --radius: 20px;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+      --bg-obsidian: #060B0E;
+      --card-surface: #0C151A;
+      --wa-emerald: #25D366;
+      --wa-teal: #10B981;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      background-color: var(--bg-obsidian);
+      color: #F1F5F9;
       overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Ambient Background Mesh */
-    .bg-glow {
-      position: fixed; inset: 0; z-index: -1; pointer-events: none;
-      background:
-        radial-gradient(600px circle at 15% 10%, rgba(16, 185, 129, 0.14), transparent 60%),
-        radial-gradient(500px circle at 85% 20%, rgba(6, 182, 212, 0.12), transparent 60%),
-        radial-gradient(700px circle at 50% 95%, rgba(16, 185, 129, 0.08), transparent 65%);
+    /* Subtle Architectural Grid Background */
+    .bg-cyber-grid {
+      background-size: 48px 48px;
+      background-image:
+        linear-gradient(to right, rgba(37, 211, 102, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(37, 211, 102, 0.04) 1px, transparent 1px);
+      mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, #000 55%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 0%, #000 55%, transparent 100%);
     }
 
-    .container { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 22px; }
-    a { color: inherit; text-decoration: none; }
-
-    /* Navbar */
-    .nav-wrap {
-      position: sticky; top: 0; z-index: 50;
-      backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-      background: rgba(7, 11, 18, 0.78);
-      border-bottom: 1px solid var(--border);
-    }
-    nav {
-      display: flex; align-items: center; justify-content: space-between;
-      height: 72px; gap: 16px;
-    }
-    .brand {
-      display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.02em;
-    }
-    .brand-icon {
-      width: 38px; height: 38px; border-radius: 12px;
-      background: linear-gradient(135deg, var(--emerald), var(--cyan));
-      display: grid; place-items: center;
-      box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35);
-    }
-    .brand-badge {
-      font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 999px;
-      background: rgba(16, 185, 129, 0.15); color: var(--emerald-bright);
-      border: 1px solid rgba(16, 185, 129, 0.3);
-    }
-    .nav-links { display: flex; align-items: center; gap: 28px; color: var(--muted); font-size: 0.92rem; font-weight: 500; }
-    .nav-links a:hover { color: var(--text); }
-
-    /* Buttons */
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
-      padding: 13px 24px; border-radius: 14px; font-weight: 700; font-size: 0.95rem;
-      cursor: pointer; border: 1px solid transparent;
-      transition: transform 0.25s cubic-bezier(.22,1,.36,1), box-shadow 0.25s ease, background 0.25s ease, border-color 0.25s ease;
-    }
-    .btn-primary {
-      background: linear-gradient(135deg, var(--emerald), #059669);
-      color: #03150e;
-      box-shadow: 0 12px 30px rgba(16, 185, 129, 0.35);
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 18px 40px rgba(16, 185, 129, 0.5);
-    }
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.04);
-      color: var(--text);
-      border-color: var(--border);
-    }
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.09);
-      border-color: rgba(255, 255, 255, 0.2);
-      transform: translateY(-2px);
-    }
-    .btn-sm { padding: 9px 16px; font-size: 0.86rem; border-radius: 11px; }
-
-    /* Hero */
-    .hero { padding: 78px 0 56px; text-align: center; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 7px 14px; border-radius: 999px; margin-bottom: 24px;
-      background: rgba(16, 185, 129, 0.1);
-      border: 1px solid rgba(16, 185, 129, 0.28);
-      color: var(--emerald-bright); font-size: 0.84rem; font-weight: 600;
-    }
-    .pill-dot {
-      width: 8px; height: 8px; border-radius: 50%; background: var(--emerald-bright);
-      box-shadow: 0 0 12px var(--emerald-bright);
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(1.3); } }
-
-    h1 {
-      font-size: clamp(2.3rem, 5.2vw, 4.1rem);
-      font-weight: 900; line-height: 1.08; letter-spacing: -0.035em;
-      max-width: 900px; margin: 0 auto 20px;
-    }
-    .gradient-text {
-      background: linear-gradient(135deg, #ffffff 10%, var(--emerald-bright) 55%, var(--cyan) 100%);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-    .hero-sub {
-      max-width: 680px; margin: 0 auto 34px; color: var(--muted);
-      font-size: clamp(1rem, 1.8vw, 1.15rem);
-    }
-    .hero-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; margin-bottom: 26px; }
-    .trust-row {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
-      font-size: 0.86rem; color: var(--muted); font-weight: 500;
-    }
-    .trust-row span { display: inline-flex; align-items: center; gap: 6px; }
-    .trust-row svg { color: var(--emerald-bright); }
-
-    /* Sections */
-    section { padding: 72px 0; }
-    .sec-head { text-align: center; max-width: 700px; margin: 0 auto 48px; }
-    .sec-eyebrow {
-      font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.14em;
-      color: var(--emerald-bright); font-weight: 800; margin-bottom: 10px;
-    }
-    .sec-head h2 {
-      font-size: clamp(1.8rem, 3.6vw, 2.75rem);
-      font-weight: 800; letter-spacing: -0.03em; line-height: 1.15; margin-bottom: 14px;
-    }
-    .sec-head p { color: var(--muted); font-size: 1rem; }
-
-    /* Browser Frame + Video */
-    .browser-frame {
-      background: linear-gradient(180deg, rgba(22, 32, 50, 0.9), rgba(11, 17, 29, 0.95));
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 22px; overflow: hidden;
-      box-shadow: 0 32px 80px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(16, 185, 129, 0.12);
-      max-width: 960px; margin: 0 auto;
-    }
-    .browser-bar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 18px; background: rgba(255, 255, 255, 0.03);
-      border-bottom: 1px solid var(--border); gap: 12px;
-    }
-    .dots { display: flex; gap: 7px; }
-    .dots i { width: 11px; height: 11px; border-radius: 50%; display: block; }
-    .dots i:nth-child(1) { background: #ef4444; }
-    .dots i:nth-child(2) { background: #f59e0b; }
-    .dots i:nth-child(3) { background: #10b981; }
-    .url-bar {
-      flex: 1; max-width: 420px; text-align: center;
-      background: rgba(0, 0, 0, 0.35); border: 1px solid var(--border);
-      border-radius: 8px; padding: 5px 12px; font-size: 0.78rem; color: var(--muted);
-    }
-    .video-wrap { position: relative; padding-bottom: 56.25%; height: 0; background: #000; }
-    .video-wrap iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
-    .video-footer {
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-      gap: 12px; padding: 14px 20px; background: rgba(7, 11, 18, 0.85);
-      border-top: 1px solid var(--border); font-size: 0.86rem; color: var(--muted);
+    /* Glassmorphism Surface */
+    .glass-nav {
+      background: rgba(6, 11, 14, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(37, 211, 102, 0.14);
     }
 
-    /* Live Interactive Simulator */
-    .sim-grid {
-      display: grid; grid-template-columns: 330px 1fr; gap: 22px; align-items: stretch;
-    }
-    .sim-panel {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 22px; display: flex; flex-direction: column; gap: 14px;
-      backdrop-filter: blur(16px);
-    }
-    .sim-panel h3 { font-size: 1.05rem; font-weight: 800; display: flex; align-items: center; justify-content: space-between; }
-    .toggle-item {
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
-      padding: 12px 14px; border-radius: 14px; background: rgba(255, 255, 255, 0.03);
-      border: 1px solid var(--border); cursor: pointer; transition: border-color 0.2s, background 0.2s;
-    }
-    .toggle-item:hover { border-color: rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.06); }
-    .toggle-item span { font-size: 0.88rem; font-weight: 600; }
-    .toggle-item small { display: block; font-size: 0.74rem; color: var(--muted); font-weight: 400; }
-    .switch {
-      width: 44px; height: 24px; border-radius: 999px; background: #1e293b;
-      position: relative; flex-shrink: 0; transition: background 0.25s;
-    }
-    .switch::after {
-      content: ""; position: absolute; top: 3px; left: 3px;
-      width: 18px; height: 18px; border-radius: 50%; background: #fff;
-      transition: transform 0.25s cubic-bezier(.22,1,.36,1);
-    }
-    .toggle-item.active .switch { background: var(--emerald); }
-    .toggle-item.active .switch::after { transform: translateX(20px); }
-
-    .panic-btn {
-      margin-top: auto; width: 100%; padding: 13px; border-radius: 14px;
-      background: rgba(244, 63, 94, 0.14); border: 1px solid rgba(244, 63, 94, 0.45);
-      color: #fda4af; font-weight: 700; font-size: 0.88rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; gap: 8px;
-      transition: all 0.2s;
-    }
-    .panic-btn:hover { background: rgba(244, 63, 94, 0.25); transform: translateY(-1px); }
-
-    /* Mock WhatsApp Window */
-    .wa-mock {
-      position: relative; border-radius: var(--radius); overflow: hidden;
-      border: 1px solid var(--border); background: #0b141a;
-      display: grid; grid-template-columns: 240px 1fr; min-height: 430px;
-      box-shadow: var(--shadow);
-    }
-    .wa-sidebar { background: #111b21; border-right: 1px solid #222e35; display: flex; flex-direction: column; }
-    .wa-top { padding: 14px 16px; background: #202c33; font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; justify-content: space-between; }
-    .wa-chat-item {
-      display: flex; align-items: center; gap: 11px; padding: 12px 14px;
-      border-bottom: 1px solid rgba(255,255,255,0.04); cursor: pointer;
-    }
-    .wa-chat-item.selected { background: #2a3942; }
-    .wa-avatar {
-      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-      display: grid; place-items: center; font-weight: 800; font-size: 0.85rem; color: #fff;
-      transition: filter 0.3s ease;
-    }
-    .wa-meta { min-width: 0; flex: 1; }
-    .wa-name { font-size: 0.86rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: filter 0.3s ease; }
-    .wa-preview { font-size: 0.76rem; color: #8696a0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: filter 0.3s ease; }
-    .order-tag {
-      display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 6px;
-      border-radius: 6px; margin-top: 3px; background: rgba(16,185,129,0.2); color: #34d399;
-    }
-    .order-tag.pending { background: rgba(245,158,11,0.2); color: #fbbf24; }
-
-    .wa-main { display: flex; flex-direction: column; background: #0b141a; }
-    .wa-messages {
-      flex: 1; padding: 18px; display: flex; flex-direction: column; gap: 10px;
-      overflow-y: auto; max-height: 290px;
-    }
-    .msg {
-      max-width: 78%; padding: 10px 13px; border-radius: 12px; font-size: 0.84rem;
-      line-height: 1.45; transition: filter 0.3s ease;
-    }
-    .msg.in { background: #202c33; align-self: flex-start; border-top-left-radius: 3px; }
-    .msg.out { background: #005c4b; align-self: flex-end; border-top-right-radius: 3px; }
-    .msg-time { display: block; text-align: right; font-size: 0.66rem; color: rgba(255,255,255,0.6); margin-top: 4px; }
-
-    /* Blur classes (reveal on hover!) */
-    .wa-mock.blur-names .wa-name { filter: blur(6px); }
-    .wa-mock.blur-photos .wa-avatar { filter: blur(7px); }
-    .wa-mock.blur-msgs .msg, .wa-mock.blur-msgs .wa-preview { filter: blur(7px); }
-    .wa-mock.blur-names .wa-name:hover,
-    .wa-mock.blur-photos .wa-avatar:hover,
-    .wa-mock.blur-msgs .msg:hover,
-    .wa-mock.blur-msgs .wa-preview:hover { filter: blur(0); }
-
-    /* Quick Reply Bar */
-    .qr-bar {
-      padding: 10px 14px; background: #162127; border-top: 1px solid #222e35;
-      display: flex; flex-wrap: wrap; gap: 7px; align-items: center;
-    }
-    .qr-chip {
-      padding: 6px 11px; border-radius: 999px; font-size: 0.74rem; font-weight: 600;
-      background: rgba(16, 185, 129, 0.14); color: var(--emerald-bright);
-      border: 1px solid rgba(16, 185, 129, 0.3); cursor: pointer; transition: all 0.2s;
-    }
-    .qr-chip:hover { background: var(--emerald); color: #03150e; transform: translateY(-1px); }
-
-    /* PIN Lock Overlay */
-    .pin-overlay {
-      position: absolute; inset: 0; z-index: 10;
-      background: rgba(7, 11, 18, 0.9); backdrop-filter: blur(18px);
-      display: none; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 24px;
-    }
-    .pin-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
-    .pin-box {
-      background: rgba(17, 25, 40, 0.95); border: 1px solid rgba(16, 185, 129, 0.35);
-      border-radius: 18px; padding: 24px; width: 100%; max-width: 290px;
-    }
-    .pin-input {
-      width: 100%; margin: 14px 0 10px; padding: 11px; text-align: center;
-      font-size: 1.2rem; letter-spacing: 0.4em; font-weight: 800;
-      border-radius: 12px; border: 1px solid var(--border);
-      background: #070b12; color: #fff; outline: none;
-    }
-    .pin-input:focus { border-color: var(--emerald); }
-    .pin-error { font-size: 0.78rem; color: #fb7185; min-height: 18px; margin-bottom: 8px; }
-
-    /* Spotlight Animated Feature Cards */
-    .cards-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-    }
-    .s-card {
-      position: relative; border-radius: var(--radius); padding: 28px 24px;
-      background: var(--card); border: 1px solid var(--border);
-      overflow: hidden; cursor: pointer;
-      transition: transform 0.35s cubic-bezier(.22,1,.36,1), border-color 0.3s ease, box-shadow 0.35s ease;
-      --mx: 50%; --my: 50%;
-    }
-    /* Mouse-tracking emerald radial spotlight */
-    .s-card::before {
-      content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0;
-      background: radial-gradient(360px circle at var(--mx) var(--my), rgba(16, 185, 129, 0.2), transparent 55%);
-      transition: opacity 0.35s ease;
-    }
-    /* Animated bottom gradient line on hover */
-    .s-card::after {
-      content: ""; position: absolute; left: 0; bottom: 0; height: 3px; width: 100%;
-      background: linear-gradient(90deg, var(--emerald), var(--cyan), var(--emerald-bright));
-      transform: scaleX(0); transform-origin: left;
-      transition: transform 0.45s cubic-bezier(.22,1,.36,1);
-    }
-    .s-card:hover {
-      transform: translateY(-7px);
-      border-color: var(--border-strong);
-      box-shadow: 0 22px 50px rgba(0, 0, 0, 0.5), 0 0 28px rgba(16, 185, 129, 0.14);
-    }
-    .s-card:hover::before { opacity: 1; }
-    .s-card:hover::after { transform: scaleX(1); }
-
-    .card-icon {
-      width: 48px; height: 48px; border-radius: 14px; margin-bottom: 18px;
-      display: grid; place-items: center;
-      background: rgba(16, 185, 129, 0.12); color: var(--emerald-bright);
-      border: 1px solid rgba(16, 185, 129, 0.25);
-      transition: transform 0.3s cubic-bezier(.22,1,.36,1), background 0.3s;
-    }
-    .s-card:hover .card-icon {
-      transform: scale(1.08) rotate(-4deg);
-      background: linear-gradient(135deg, var(--emerald), var(--cyan));
-      color: #03150e;
-    }
-    .s-card h3 { font-size: 1.12rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.015em; }
-    .s-card p { font-size: 0.9rem; color: var(--muted); margin-bottom: 16px; }
-    .card-cta {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 0.82rem; font-weight: 700; color: var(--emerald-bright);
-    }
-    .card-cta span { transition: transform 0.25s ease; }
-    .s-card:hover .card-cta span { transform: translateX(4px); }
-
-    /* 3-Step Flow */
-    .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
-    .step-num {
-      font-size: 0.78rem; font-weight: 900; color: var(--emerald-bright);
-      background: rgba(16, 185, 129, 0.14); border: 1px solid rgba(16, 185, 129, 0.3);
-      display: inline-block; padding: 4px 10px; border-radius: 999px; margin-bottom: 14px;
+    .glass-panel {
+      background: linear-gradient(160deg, rgba(16, 29, 36, 0.78) 0%, rgba(12, 21, 26, 0.92) 100%);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
     }
 
-    /* Comparison Table */
-    .table-wrap {
-      overflow-x: auto; border-radius: var(--radius);
-      border: 1px solid var(--border); background: var(--card);
+    /* 60FPS Mouse-Tracking Spotlight Feature Cards */
+    .spotlight-card {
+      position: relative;
+      background: linear-gradient(165deg, rgba(16, 29, 36, 0.85) 0%, rgba(10, 18, 23, 0.96) 100%);
+      border-radius: 1.25rem;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.35s ease,
+                  box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+      will-change: transform;
+      overflow: hidden;
     }
-    table { width: 100%; border-collapse: collapse; min-width: 640px; }
-    th, td { padding: 16px 20px; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.92rem; }
-    th { background: rgba(255, 255, 255, 0.03); font-weight: 800; color: #fff; }
-    td:nth-child(2) { color: var(--emerald-bright); font-weight: 600; background: rgba(16, 185, 129, 0.04); }
-    td:nth-child(3) { color: var(--muted); }
-    tr:last-child td { border-bottom: 0; }
 
-    /* FAQ Accordion */
-    .faq-list { max-width: 820px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-    .faq-item {
-      border-radius: 16px; border: 1px solid var(--border); background: var(--card); overflow: hidden;
-      transition: border-color 0.25s;
+    /* Dynamic Spotlight Radial Border & Surface Sheen */
+    .spotlight-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.5px;
+      background: radial-gradient(
+        420px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(37, 211, 102, 0.75),
+        rgba(16, 185, 129, 0.22) 40%,
+        transparent 75%
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
-    .faq-item.open { border-color: var(--border-strong); }
-    .faq-q {
-      width: 100%; text-align: left; background: none; border: 0; color: #fff;
-      padding: 18px 22px; font-size: 0.98rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; justify-content: space-between; gap: 14px;
-    }
-    .faq-q svg { transition: transform 0.3s ease; flex-shrink: 0; color: var(--emerald-bright); }
-    .faq-item.open .faq-q svg { transform: rotate(180deg); }
-    .faq-a {
-      max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.35s ease;
-      padding: 0 22px; color: var(--muted); font-size: 0.92rem;
-    }
-    .faq-item.open .faq-a { max-height: 260px; padding: 0 22px 18px; }
 
-    /* Final CTA Banner */
-    .cta-box {
-      border-radius: 26px; padding: 54px 28px; text-align: center;
-      background: linear-gradient(135deg, rgba(16, 185, 129, 0.16), rgba(6, 182, 212, 0.12) 60%, rgba(17, 25, 40, 0.9));
-      border: 1px solid rgba(16, 185, 129, 0.35);
-      box-shadow: var(--shadow);
+    .spotlight-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        360px circle at var(--mouse-x, -500px) var(--mouse-y, -500px),
+        rgba(37, 211, 102, 0.11),
+        transparent 70%
+      );
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
-    .cta-box h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); font-weight: 900; margin-bottom: 12px; }
-    .cta-box p { color: var(--muted); max-width: 580px; margin: 0 auto 28px; }
 
-    /* Modal Popup */
+    .spotlight-grid:hover .spotlight-card::before,
+    .spotlight-card:hover::after {
+      opacity: 1;
+    }
+
+    .spotlight-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(37, 211, 102, 0.35);
+      box-shadow: 0 22px 45px -15px rgba(0, 0, 0, 0.75), 0 0 28px -6px rgba(37, 211, 102, 0.18);
+    }
+
+    /* Animated Bottom Line Sweep on Card Hover */
+    .card-line-sweep {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 2px;
+      width: 0%;
+      background: linear-gradient(90deg, transparent, #25D366, #10B981, transparent);
+      transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .spotlight-card:hover .card-line-sweep {
+      width: 100%;
+    }
+
+    /* Scroll Reveal Utility */
+    .reveal-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .reveal-up.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Simulator Blur Filters with Hover-to-Reveal */
+    .wa-blur-active {
+      filter: blur(6.5px);
+      user-select: none;
+      transition: filter 0.22s ease;
+    }
+
+    .wa-blur-active:hover {
+      filter: blur(0px);
+    }
+
+    .wa-avatar-blur-active {
+      filter: blur(7px);
+      transition: filter 0.22s ease;
+    }
+
+    .wa-avatar-blur-active:hover {
+      filter: blur(0px);
+    }
+
+    /* Spring Modal Animation */
     .modal-backdrop {
-      position: fixed; inset: 0; z-index: 100; display: none; place-items: center; padding: 20px;
-      background: rgba(3, 6, 12, 0.78); backdrop-filter: blur(12px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.28s ease, visibility 0.28s ease;
     }
-    .modal-backdrop.open { display: grid; animation: fadeIn 0.2s ease; }
-    .modal-card {
-      width: 100%; max-width: 520px; border-radius: 22px; padding: 28px;
-      background: #0f172a; border: 1px solid rgba(16, 185, 129, 0.4);
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75);
-      transform: scale(0.94); animation: springPop 0.3s cubic-bezier(.22,1,.36,1) forwards;
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes springPop { to { transform: scale(1); } }
-    .modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
-    .modal-close {
-      background: rgba(255,255,255,0.06); border: 1px solid var(--border); color: #fff;
-      width: 34px; height: 34px; border-radius: 10px; cursor: pointer; font-size: 1.1rem;
-    }
-    .modal-close:hover { background: rgba(244,63,94,0.2); border-color: rgba(244,63,94,0.5); }
-    .modal-list { list-style: none; display: flex; flex-direction: column; gap: 10px; margin: 18px 0 24px; }
-    .modal-list li {
-      display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #e2e8f0;
-      padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.03);
-      border: 1px solid var(--border);
-    }
-    .modal-list li::before { content: "✓"; color: var(--emerald-bright); font-weight: 900; }
 
-    /* Footer */
-    footer {
-      border-top: 1px solid var(--border); padding: 38px 0; color: var(--muted); font-size: 0.88rem;
+    .modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
     }
-    .footer-inner {
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
-    }
-    .footer-links { display: flex; flex-wrap: wrap; gap: 22px; }
-    .footer-links a:hover { color: var(--emerald-bright); }
 
-    /* Responsive */
-    @media (max-width: 960px) {
-      .sim-grid { grid-template-columns: 1fr; }
-      .cards-grid, .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .modal-panel {
+      opacity: 0;
+      transform: scale(0.92) translateY(16px);
+      transition: opacity 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+                  transform 0.36s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    @media (max-width: 680px) {
-      .nav-links { display: none; }
-      .cards-grid, .steps-grid { grid-template-columns: 1fr; }
-      .wa-mock { grid-template-columns: 1fr; }
-      .wa-sidebar { display: none; }
+
+    .modal-backdrop.open .modal-panel {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Smooth FAQ Accordion */
+    .faq-answer {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .faq-item.active .faq-answer {
+      grid-template-rows: 1fr;
+    }
+
+    .faq-inner {
+      overflow: hidden;
+    }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #060B0E;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #172832;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #25D366;
     }
   </style>
 </head>
-<body>
-  <div class="bg-glow"></div>
+<body class="font-sans selection:bg-wa/30 selection:text-white">
 
-  <!-- Navbar -->
-  <div class="nav-wrap">
-    <div class="container">
-      <nav>
-        <a href="#" class="brand">
-          <span class="brand-icon" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#03150e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-          </span>
-          <span>Privacy WA</span>
-          <span class="brand-badge">v1.2.3</span>
-        </a>
-        <div class="nav-links">
-          <a href="#demo">Video Tour</a>
-          <a href="#simulator">Live Demo</a>
-          <a href="#features">Features</a>
-          <a href="#compare">Compare</a>
-          <a href="#faq">FAQ</a>
-        </div>
-        <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
-          Add to Chrome
-        </a>
-      </nav>
-    </div>
+  <!-- Ambient Top Mesh Glows -->
+  <div class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[820px] h-[440px] rounded-full bg-wa/15 blur-[130px] animate-pulse-slow"></div>
+    <div class="absolute top-[38%] -right-40 w-[480px] h-[480px] rounded-full bg-wa-teal/10 blur-[130px]"></div>
+    <div class="absolute inset-0 bg-cyber-grid"></div>
   </div>
 
-  <!-- Hero -->
-  <header class="hero">
-    <div class="container">
-      <div class="pill">
-        <span class="pill-dot"></span>
-        <span>100% Local Processing • Zero Data Collection • Free Forever</span>
-      </div>
-      <h1>
-        Protect Your WhatsApp Web.<br />
-        <span class="gradient-text">Blur Chats, Lock Screen &amp; Reply Faster.</span>
-      </h1>
-      <p class="hero-sub">
-        Keep prying eyes away in offices, shops, and screen-shares. Privacy WA adds instant granular blur, an <strong>Alt+X Panic Shield</strong>, local PIN lock, order &amp; payment tracking, chat notes, and 1-click quick replies directly inside WhatsApp Web.
-      </p>
-      <div class="hero-actions">
-        <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener" class="btn btn-primary">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/><line x1="21.17" y1="8" x2="12" y2="8"/><line x1="3.95" y1="6.06" x2="8.54" y2="14"/><line x1="10.88" y1="21.94" x2="15.46" y2="14"/></svg>
-          Install Free for Chrome
+  <!-- =========================================================
+       1. STICKY FROSTED GLASS NAVBAR
+       ========================================================= -->
+  <header class="sticky top-0 z-40 glass-nav">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 py-3.5 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center gap-3 group focus:outline-none">
+        <div class="relative w-10 h-10 rounded-xl bg-gradient-to-br from-wa to-emerald-700 p-[1px] shadow-lg shadow-wa/20 group-hover:shadow-wa/40 transition-shadow">
+          <div class="w-full h-full rounded-[11px] bg-obsidian-950/90 flex items-center justify-center">
+            <!-- Custom Crisp SVG Shield + Lock Icon -->
+            <svg class="w-5 h-5 text-wa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(37, 211, 102, 0.14)" />
+              <rect x="9" y="11" width="6" height="5" rx="1" />
+              <path d="M10 11V9a2 2 0 1 1 4 0v2" />
+            </svg>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="font-display font-extrabold text-lg sm:text-xl tracking-tight text-white">Privacy <span class="text-wa">WA</span></span>
+          <span class="font-mono text-[11px] font-semibold px-2 py-0.5 rounded-full bg-wa/15 text-wa border border-wa/30">v1.2.3</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden md:flex items-center gap-7 text-sm font-medium text-slate-300">
+        <a href="#video-tour" class="hover:text-wa transition-colors">Video Tour</a>
+        <a href="#simulator" class="hover:text-wa transition-colors flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-wa animate-ping"></span>
+          Live Simulator
         </a>
-        <a href="#simulator" class="btn btn-secondary">Try Interactive Simulator ↓</a>
+        <a href="#features" class="hover:text-wa transition-colors">Features</a>
+        <a href="#comparison" class="hover:text-wa transition-colors">Why Us</a>
+        <a href="#faq" class="hover:text-wa transition-colors">FAQ</a>
+      </nav>
+
+      <!-- Primary CTA + Mobile Menu Button -->
+      <div class="flex items-center gap-2.5">
+        <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-xl font-display font-bold text-xs sm:text-sm bg-wa hover:bg-wa-light text-obsidian-950 shadow-lg shadow-wa/25 hover:shadow-wa/45 transition-all duration-200 active:scale-[0.98]">
+          <!-- Chrome Icon SVG -->
+          <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="4" />
+            <line x1="21.17" y1="8" x2="12" y2="8" />
+            <line x1="3.95" y1="6.06" x2="8.54" y2="14" />
+            <line x1="10.88" y1="21.94" x2="15.46" y2="14" />
+          </svg>
+          <span>Add to Chrome — Free</span>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button id="mobileMenuBtn"
+                type="button"
+                aria-label="Toggle Menu"
+                class="md:hidden p-2.5 rounded-xl bg-obsidian-800/80 border border-white/10 text-slate-200 hover:text-wa focus:outline-none">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
       </div>
-      <div class="trust-row">
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Works on Chrome &amp; Edge</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> No WhatsApp API Needed</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> No Login or Credit Card</span>
-        <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Zero External Servers</span>
-      </div>
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobileMenu" class="hidden md:hidden border-t border-white/10 bg-obsidian-950/95 px-4 pt-3 pb-5 space-y-2">
+      <a href="#video-tour" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-wa/10 hover:text-wa">Video Tour</a>
+      <a href="#simulator" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-wa/10 hover:text-wa">Live Privacy Simulator</a>
+      <a href="#features" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-wa/10 hover:text-wa">Pro Features (Click for Details)</a>
+      <a href="#comparison" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-wa/10 hover:text-wa">Privacy WA vs. Others</a>
+      <a href="#faq" class="block px-3 py-2.5 rounded-xl text-sm font-medium text-slate-200 hover:bg-wa/10 hover:text-wa">FAQ &amp; Updates</a>
     </div>
   </header>
 
-  <!-- Official Promo Video Section -->
-  <section id="demo" style="padding-top: 10px;">
-    <div class="container">
-      <div class="sec-head" style="margin-bottom: 30px;">
-        <div class="sec-eyebrow">Official Product Demo</div>
-        <h2>See Privacy WA in Action</h2>
-        <p>Watch how chat blur, PIN lock, order tracking, and 1-click quick replies work seamlessly inside WhatsApp Web.</p>
-      </div>
-      <div class="browser-frame">
-        <div class="browser-bar">
-          <div class="dots"><i></i><i></i><i></i></div>
-          <div class="url-bar">web.whatsapp.com • Privacy WA Shield Active</div>
-          <a href="https://www.youtube.com/watch?v=-C9UmEVFfrE" target="_blank" rel="noopener" style="font-size:0.78rem; color:var(--emerald-bright); font-weight:700;">YouTube ↗</a>
-        </div>
-        <div class="video-wrap">
-          <iframe
-            src="https://www.youtube.com/embed/-C9UmEVFfrE?rel=0&modestbranding=1"
-            title="Privacy WA - Chat Blur & Quick Reply for WhatsApp Web"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-            loading="lazy">
-          </iframe>
-        </div>
-        <div class="video-footer">
-          <span>🎬 Privacy WA v1.2.3 — Chat Blur, Alt+X Panic Shield &amp; Quick Replies</span>
-          <a href="https://www.youtube.com/watch?v=-C9UmEVFfrE" target="_blank" rel="noopener" style="color:var(--emerald-bright); font-weight:700;">Watch directly on YouTube →</a>
-        </div>
-      </div>
-    </div>
-  </section>
+  <main class="relative z-10">
 
-  <!-- Interactive WhatsApp Web Privacy Simulator -->
-  <section id="simulator">
-    <div class="container">
-      <div class="sec-head">
-        <div class="sec-eyebrow">Interactive Sandbox</div>
-        <h2>Test Every Privacy Control Live</h2>
-        <p>Toggle switches below, hover over blurred messages to peek, click a Quick Reply chip, or press <strong>Alt + X</strong> on your keyboard to trigger the PIN Lock Shield (Demo PIN: <strong>1234</strong>).</p>
-      </div>
+    <!-- =========================================================
+         2. HERO SECTION + EMBEDDED YOUTUBE PROMO VIDEO
+         ========================================================= -->
+    <section class="pt-12 sm:pt-16 pb-16 sm:pb-24 px-4 sm:px-6 lg:px-8">
+      <div class="max-w-6xl mx-auto text-center">
 
-      <div class="sim-grid">
-        <div class="sim-panel">
-          <h3>
-            <span>Privacy WA Controls</span>
-            <span class="brand-badge">LIVE</span>
-          </h3>
-          <div class="toggle-item active" data-toggle="blur-msgs">
-            <div><span>Blur Messages &amp; Previews</span><small>Hover any bubble to reveal</small></div>
-            <div class="switch"></div>
-          </div>
-          <div class="toggle-item active" data-toggle="blur-names">
-            <div><span>Blur Contact Names</span><small>Hide client &amp; personal names</small></div>
-            <div class="switch"></div>
-          </div>
-          <div class="toggle-item" data-toggle="blur-photos">
-            <div><span>Blur Profile Photos</span><small>Mask avatars in sidebar</small></div>
-            <div class="switch"></div>
-          </div>
-          <button class="panic-btn" id="triggerPanic" type="button">
-            🔒 Trigger Panic Shield (Alt + X)
-          </button>
+        <!-- Status Trust Pill -->
+        <div class="inline-flex flex-wrap items-center justify-center gap-2 px-4 py-1.5 rounded-full bg-obsidian-800/90 border border-wa/30 text-xs sm:text-sm font-medium text-emerald-300 mb-7 shadow-inner shadow-wa/10">
+          <span class="w-2 h-2 rounded-full bg-wa animate-pulse"></span>
+          <span>100% Local Storage &bull; Zero External Servers &bull; Chrome &amp; Edge Ready</span>
         </div>
 
-        <div class="wa-mock blur-msgs blur-names" id="waMock">
-          <div class="wa-sidebar">
-            <div class="wa-top">
-              <span>WhatsApp Web</span>
-              <span style="color:var(--emerald-bright); font-size:0.75rem;">● Shield ON</span>
-            </div>
-            <div class="wa-chat-item selected">
-              <div class="wa-avatar" style="background:#059669;">SA</div>
-              <div class="wa-meta">
-                <div class="wa-name">Sohail Anjum (VIP)</div>
-                <div class="wa-preview">Payment sent: PKR 18,500</div>
-                <span class="order-tag">PAID • #ORD-409</span>
-              </div>
-            </div>
-            <div class="wa-chat-item">
-              <div class="wa-avatar" style="background:#0284c7;">AK</div>
-              <div class="wa-meta">
-                <div class="wa-name">Ahsan Khan</div>
-                <div class="wa-preview">Please confirm delivery address</div>
-                <span class="order-tag pending">PENDING COD</span>
-              </div>
-            </div>
-            <div class="wa-chat-item">
-              <div class="wa-avatar" style="background:#7c3aed;">DM</div>
-              <div class="wa-meta">
-                <div class="wa-name">Wholesale Supplier</div>
-                <div class="wa-preview">Updated invoice PDF attached</div>
-              </div>
-            </div>
-          </div>
+        <!-- Bold Gradient Headline -->
+        <h1 class="font-display font-extrabold text-3xl sm:text-5xl lg:text-6xl tracking-tight text-white leading-[1.12] max-w-4xl mx-auto">
+          Blur Chats, Lock Your Screen &amp;
+          <span class="bg-gradient-to-r from-wa via-emerald-300 to-teal-400 bg-clip-text text-transparent">
+            Reply 10x Faster
+          </span>
+          on WhatsApp Web.
+        </h1>
 
-          <div class="wa-main">
-            <div class="wa-top">
-              <div>
-                <div class="wa-name">Sohail Anjum (VIP)</div>
-                <div style="font-size:0.7rem; color:var(--emerald-bright);">📝 Note: Prefers evening delivery</div>
-              </div>
-              <span style="font-size:0.72rem; color:var(--muted);">Hover blurred text to read</span>
-            </div>
-            <div class="wa-messages" id="waMessages">
-              <div class="msg in">
-                Assalam o Alaikum! I just transferred PKR 18,500 for Order #409. Please confirm receipt.
-                <span class="msg-time">2:14 PM</span>
-              </div>
-              <div class="msg out">
-                Walaikum Assalam! Payment verified — your parcel is packed and dispatching today.
-                <span class="msg-time">2:15 PM ✓✓</span>
-              </div>
-            </div>
-            <div class="qr-bar">
-              <span style="font-size:0.72rem; color:var(--muted); font-weight:700;">⚡ Quick Replies:</span>
-              <button class="qr-chip" data-reply="Thank you! Your order #409 is confirmed and out for delivery today. 🚚">Confirm Order</button>
-              <button class="qr-chip" data-reply="Payment received with thanks! Here is your digital receipt. ✅">Payment Received</button>
-              <button class="qr-chip" data-reply="Our store timing is 9 AM to 9 PM. Let us know how we can help! 😊">Store Timing</button>
-            </div>
-          </div>
+        <!-- Subheadline -->
+        <p class="mt-6 text-base sm:text-lg lg:text-xl text-slate-300/90 max-w-3xl mx-auto leading-relaxed">
+          Protect sensitive conversations in offices, cafes, or screen shares with instant chat &amp; media blur, an
+          <kbd class="font-mono text-xs sm:text-sm px-2 py-0.5 rounded-md bg-obsidian-800 border border-wa/40 text-wa">Alt+X</kbd>
+          Panic Shield, Local PIN Lock, 1-Click Quick Replies, and Customer Order Notes — all running 100% privately inside your browser.
+        </p>
 
-          <!-- Local PIN Lock Overlay -->
-          <div class="pin-overlay" id="pinOverlay">
-            <div class="pin-box">
-              <div style="font-size:1.8rem; margin-bottom:6px;">🛡️</div>
-              <h4 style="font-size:1.05rem; font-weight:800;">Privacy WA Locked</h4>
-              <p style="font-size:0.8rem; color:var(--muted); margin-top:4px;">Enter PIN <strong>1234</strong> to unlock WhatsApp Web</p>
-              <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" />
-              <div class="pin-error" id="pinError"></div>
-              <button class="btn btn-primary btn-sm" id="unlockBtn" style="width:100%;" type="button">Unlock Screen</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Spotlight Feature Cards (Click for Modal Popup) -->
-  <section id="features">
-    <div class="container">
-      <div class="sec-head">
-        <div class="sec-eyebrow">Built for Speed &amp; Privacy</div>
-        <h2>Everything You Need Inside WhatsApp Web</h2>
-        <p>Hover over any card for smooth spotlight interaction — click any card to inspect full technical capabilities.</p>
-      </div>
-
-      <div class="cards-grid">
-        <article class="s-card" data-modal="blur">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-          </div>
-          <h3>Granular Chat &amp; Media Blur</h3>
-          <p>Independently blur chat messages, contact names, profile avatars, and media previews — hover smoothly to reveal.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-
-        <article class="s-card" data-modal="panic">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <h3>Alt+X Panic Shield &amp; PIN Lock</h3>
-          <p>Hide your entire WhatsApp Web workspace in a millisecond with Alt+X and protect it behind a local PIN with recovery code.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-
-        <article class="s-card" data-modal="quickreply">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-          </div>
-          <h3>1-Click Quick Replies</h3>
-          <p>Save reusable replies for pricing, bank details, delivery updates, and FAQs — insert and send in a single click.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-
-        <article class="s-card" data-modal="orders">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-          </div>
-          <h3>Order &amp; Payment Status Tags</h3>
-          <p>Track COD, Paid, Pending, and Dispatched customer statuses directly alongside each WhatsApp conversation.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-
-        <article class="s-card" data-modal="notes">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
-          <h3>Private Per-Chat Notes</h3>
-          <p>Attach delivery instructions, follow-up reminders, or customer preferences to any chat — stored strictly on your PC.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-
-        <article class="s-card" data-modal="local">
-          <div class="card-icon">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          </div>
-          <h3>100% Local Zero-Server Security</h3>
-          <p>Your chats, PIN, notes, and templates never leave Chrome's local storage. No analytics, no tracking, no third-party servers.</p>
-          <div class="card-cta">Inspect Feature <span>→</span></div>
-        </article>
-      </div>
-    </div>
-  </section>
-
-  <!-- 3-Step Setup -->
-  <section>
-    <div class="container">
-      <div class="sec-head">
-        <div class="sec-eyebrow">1-Minute Setup</div>
-        <h2>How to Get Started</h2>
-      </div>
-      <div class="steps-grid">
-        <div class="s-card" style="cursor:default;">
-          <span class="step-num">STEP 01</span>
-          <h3>Install from Chrome Web Store</h3>
-          <p style="margin-bottom:0;">Click “Add to Chrome” and pin the Privacy WA icon to your browser toolbar for instant access.</p>
-        </div>
-        <div class="s-card" style="cursor:default;">
-          <span class="step-num">STEP 02</span>
-          <h3>Open WhatsApp Web</h3>
-          <p style="margin-bottom:0;">Choose which elements to blur, set your optional local PIN + recovery code, and save your quick replies.</p>
-        </div>
-        <div class="s-card" style="cursor:default;">
-          <span class="step-num">STEP 03</span>
-          <h3>Work Privately &amp; Faster</h3>
-          <p style="margin-bottom:0;">Hit <strong>Alt+X</strong> whenever someone walks by, reply to customers in 1 click, and track orders effortlessly.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Comparison Table -->
-  <section id="compare">
-    <div class="container">
-      <div class="sec-head">
-        <div class="sec-eyebrow">Why Privacy WA Wins</div>
-        <h2>Privacy WA vs Typical WhatsApp Extensions</h2>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Capability</th>
-              <th>Privacy WA (v1.2.3)</th>
-              <th>Typical Cloud / Bulk Extensions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Data Privacy &amp; Storage</td>
-              <td>100% Local Chrome Storage (Zero Servers)</td>
-              <td>Often syncs data or requires account login</td>
-            </tr>
-            <tr>
-              <td>Alt+X Panic Shield + PIN Lock</td>
-              <td>Built-in with offline recovery code</td>
-              <td>Rarely included or locked behind paywall</td>
-            </tr>
-            <tr>
-              <td>Granular Hover-to-Reveal Blur</td>
-              <td>Messages, names, avatars &amp; media separately</td>
-              <td>All-or-nothing basic blur</td>
-            </tr>
-            <tr>
-              <td>Quick Replies + Chat Notes + Order Tags</td>
-              <td>Included free in one lightweight tool</td>
-              <td>Requires separate paid CRM subscriptions</td>
-            </tr>
-            <tr>
-              <td>Account Safety</td>
-              <td>UI-only privacy &amp; productivity (Zero spam risk)</td>
-              <td>Automated bulk blasting risks account bans</td>
-            </tr>
-            <tr>
-              <td>Pricing</td>
-              <td>Free of charge • No credit card needed</td>
-              <td>Monthly subscriptions &amp; feature locks</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="container">
-      <div class="sec-head">
-        <div class="sec-eyebrow">Questions &amp; Answers</div>
-        <h2>Frequently Asked Questions</h2>
-      </div>
-      <div class="faq-list">
-        <div class="faq-item open">
-          <button class="faq-q" type="button">
-            Does Privacy WA read, collect, or upload my WhatsApp messages?
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-a">Never. Privacy WA runs 100% locally inside your browser. Your preferences, quick replies, chat notes, and PIN are saved strictly inside Chrome's local storage and are never transmitted to any external server.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" type="button">
-            What happens if I forget my local PIN Lock code?
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-a">When you enable PIN Lock in v1.2.3, Privacy WA automatically generates an offline Recovery Code so you can safely unlock and reset your PIN anytime without contacting support.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" type="button">
-            Will using Privacy WA get my WhatsApp account banned?
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-a">No. Unlike bulk spam senders, Privacy WA does not send automated unauthorized messages or modify WhatsApp's servers. It only applies clean visual CSS privacy filters and local productivity shortcuts inside your own browser.</div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" type="button">
-            Does it work on Microsoft Edge and Brave Browser?
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="faq-a">Yes! Any Chromium-based desktop browser — including Google Chrome, Microsoft Edge, Brave, and Opera — can install and run Privacy WA smoothly.</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Bottom CTA -->
-  <section style="padding-top: 20px;">
-    <div class="container">
-      <div class="cta-box">
-        <h2>Ready to Shield Your WhatsApp Web?</h2>
-        <p>Install Privacy WA v1.2.3 in seconds — blur sensitive chats, lock your screen with Alt+X, and speed up customer replies completely free.</p>
-        <div class="hero-actions" style="margin-bottom:0;">
-          <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener" class="btn btn-primary">
-            Install Privacy WA — Free
+        <!-- Dual CTA Buttons -->
+        <div class="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl font-display font-bold text-base bg-gradient-to-r from-wa to-emerald-500 hover:from-wa-light hover:to-wa text-obsidian-950 shadow-xl shadow-wa/25 hover:shadow-wa/45 transition-all duration-200 hover:-translate-y-0.5">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            <span>Install Free on Chrome</span>
           </a>
-          <a href="https://privacywa.tronbusiness.shop/support.html" class="btn btn-secondary">Contact Support</a>
+
+          <a href="#simulator"
+             class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl font-display font-bold text-base bg-obsidian-850/90 hover:bg-obsidian-800 text-white border border-white/15 hover:border-wa/50 transition-all duration-200 hover:-translate-y-0.5">
+            <svg class="w-5 h-5 text-wa" fill="none" stroke="currentColor" stroke-width="2.1" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Try Interactive Demo</span>
+          </a>
+        </div>
+
+        <!-- Micro Trust Badges -->
+        <div class="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs sm:text-sm text-slate-400">
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-wa" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            No Account Login Required
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-wa" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Zero Bulk-Spam Ban Risk
+          </span>
+          <span class="flex items-center gap-1.5">
+            <svg class="w-4 h-4 text-wa" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+            Built by Tron Business
+          </span>
+        </div>
+
+        <!-- =========================================================
+             FEATURED YOUTUBE VIDEO SHOWCASE CARD
+             ========================================================= -->
+        <div id="video-tour" class="mt-14 sm:mt-16 max-w-4xl mx-auto scroll-mt-24">
+          <div class="relative rounded-2xl sm:rounded-3xl p-[1.5px] bg-gradient-to-b from-wa/60 via-emerald-500/20 to-white/10 shadow-[0_25px_70px_-15px_rgba(37,211,102,0.22)]">
+            <div class="rounded-[22px] sm:rounded-[23px] bg-obsidian-900/95 overflow-hidden">
+              <!-- Sleek Browser Window Top Bar -->
+              <div class="px-4 sm:px-5 py-3 bg-obsidian-950/90 border-b border-white/10 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="w-3 h-3 rounded-full bg-rose-500/85"></span>
+                  <span class="w-3 h-3 rounded-full bg-amber-400/85"></span>
+                  <span class="w-3 h-3 rounded-full bg-wa/90"></span>
+                </div>
+
+                <div class="hidden sm:flex items-center gap-2 px-3.5 py-1 rounded-lg bg-obsidian-850 border border-white/10 text-xs font-mono text-slate-300">
+                  <svg class="w-3.5 h-3.5 text-wa" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <span>privacywa.tronbusiness.shop &bull; Official Demo (v1.2.3)</span>
+                </div>
+
+                <a href="https://www.youtube.com/watch?v=-C9UmEVFfrE"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-300 hover:text-wa transition-colors">
+                  <span>Watch on YouTube</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
+
+              <!-- Responsive 16:9 YouTube Embed -->
+              <div class="relative w-full aspect-video bg-black">
+                <iframe
+                  class="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/-C9UmEVFfrE?rel=0&modestbranding=1"
+                  title="Privacy WA - Chat Blur & Quick Reply for WhatsApp Web Official Demo"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy">
+                </iframe>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =========================================================
+         3-STEP ULTRA-FAST WORKFLOW STRIP
+         ========================================================= -->
+    <section class="py-10 px-4 sm:px-6 lg:px-8 border-y border-white/5 bg-obsidian-900/40">
+      <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="flex items-start gap-4 p-5 rounded-2xl glass-panel reveal-up">
+          <span class="font-mono font-bold text-sm px-3 py-1.5 rounded-xl bg-wa/15 text-wa border border-wa/30 shrink-0">01</span>
+          <div>
+            <h3 class="font-display font-bold text-white text-base">1-Click Install</h3>
+            <p class="text-sm text-slate-400 mt-1">Add Privacy WA to Google Chrome or Microsoft Edge in 2 seconds — no sign-up or API keys.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-5 rounded-2xl glass-panel reveal-up" style="transition-delay: 80ms;">
+          <span class="font-mono font-bold text-sm px-3 py-1.5 rounded-xl bg-wa/15 text-wa border border-wa/30 shrink-0">02</span>
+          <div>
+            <h3 class="font-display font-bold text-white text-base">Open WhatsApp Web</h3>
+            <p class="text-sm text-slate-400 mt-1">Your privacy controls, Quick Reply bar, and Order Status tags appear seamlessly inside WhatsApp Web.</p>
+          </div>
+        </div>
+        <div class="flex items-start gap-4 p-5 rounded-2xl glass-panel reveal-up" style="transition-delay: 160ms;">
+          <span class="font-mono font-bold text-sm px-3 py-1.5 rounded-xl bg-wa/15 text-wa border border-wa/30 shrink-0">03</span>
+          <div>
+            <h3 class="font-display font-bold text-white text-base">Blur, Lock &amp; Close Sales</h3>
+            <p class="text-sm text-slate-400 mt-1">Hover to peek blurred chats, press <kbd class="font-mono text-xs text-wa">Alt+X</kbd> for instant shield, and reply in 1 click.</p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
-  <footer>
-    <div class="container">
-      <div class="footer-inner">
-        <div>
-          <strong style="color:#fff;">Privacy WA</strong> by <strong>Tron Business</strong> • © 2026 All rights reserved.<br />
-          <small style="opacity:0.75;">Independent browser extension. Not affiliated with or endorsed by WhatsApp LLC or Meta Platforms, Inc.</small>
+    <!-- =========================================================
+         3. INTERACTIVE LIVE WHATSAPP WEB PRIVACY SIMULATOR
+         ========================================================= -->
+    <section id="simulator" class="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 scroll-mt-20">
+      <div class="max-w-6xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-12 reveal-up">
+          <span class="inline-block font-mono text-xs font-semibold uppercase tracking-widest text-wa px-3 py-1 rounded-full bg-wa/10 border border-wa/25 mb-3">
+            Interactive Sandbox
+          </span>
+          <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-white">
+            Test <span class="text-wa">Privacy WA</span> Live Right Here
+          </h2>
+          <p class="mt-3 text-slate-400 text-sm sm:text-base">
+            Toggle the switches below, hover over blurred messages to peek, click a 1-Click Quick Reply, or trigger the <kbd class="font-mono text-xs px-1.5 py-0.5 rounded bg-obsidian-800 border border-white/15 text-wa">Alt+X</kbd> Panic Shield!
+          </p>
         </div>
-        <div class="footer-links">
-          <a href="https://privacywa.tronbusiness.shop/privacy.html">Privacy Policy</a>
-          <a href="https://privacywa.tronbusiness.shop/support.html">Support</a>
-          <a href="https://www.youtube.com/watch?v=-C9UmEVFfrE" target="_blank" rel="noopener">Promo Video</a>
-          <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener">Chrome Web Store</a>
+
+        <!-- Simulator Control Bar -->
+        <div class="glass-panel rounded-2xl p-4 sm:p-5 mb-6 flex flex-wrap items-center justify-between gap-4 reveal-up">
+          <div class="flex flex-wrap items-center gap-3 sm:gap-5">
+            <!-- Toggle 1: Blur Names -->
+            <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+              <input id="simBlurNames" type="checkbox" checked class="sr-only peer" />
+              <div class="w-10 h-6 bg-obsidian-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all relative peer-checked:bg-wa border border-white/10"></div>
+              <span class="text-xs sm:text-sm font-medium text-slate-200">Blur Contact Names</span>
+            </label>
+
+            <!-- Toggle 2: Blur Messages -->
+            <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+              <input id="simBlurMsgs" type="checkbox" checked class="sr-only peer" />
+              <div class="w-10 h-6 bg-obsidian-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all relative peer-checked:bg-wa border border-white/10"></div>
+              <span class="text-xs sm:text-sm font-medium text-slate-200">Blur Messages</span>
+            </label>
+
+            <!-- Toggle 3: Blur Avatars -->
+            <label class="inline-flex items-center gap-2.5 cursor-pointer select-none">
+              <input id="simBlurPhotos" type="checkbox" checked class="sr-only peer" />
+              <div class="w-10 h-6 bg-obsidian-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all relative peer-checked:bg-wa border border-white/10"></div>
+              <span class="text-xs sm:text-sm font-medium text-slate-200">Blur Profile Photos</span>
+            </label>
+          </div>
+
+          <!-- Panic Shield Trigger Button -->
+          <button id="triggerPanicBtn"
+                  type="button"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-display font-bold text-xs sm:text-sm bg-rose-500/15 hover:bg-rose-500/25 text-rose-300 border border-rose-500/40 transition-all active:scale-95">
+            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <span>Trigger Panic Shield (Alt+X)</span>
+          </button>
         </div>
+
+        <!-- Realistic WhatsApp Web Dark Mockup Container -->
+        <div class="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#0B141A] reveal-up">
+
+          <!-- PANIC SHIELD / PIN LOCK OVERLAY -->
+          <div id="panicShieldOverlay"
+               class="hidden absolute inset-0 z-30 bg-[#060B0E]/95 backdrop-blur-2xl flex flex-col items-center justify-center p-6 text-center transition-all">
+            <div class="w-16 h-16 rounded-2xl bg-wa/15 border border-wa/40 flex items-center justify-center mb-4 shadow-lg shadow-wa/20">
+              <svg class="w-8 h-8 text-wa" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <rect x="9" y="11" width="6" height="5" rx="1" />
+                <path d="M10 11V9a2 2 0 1 1 4 0v2" />
+              </svg>
+            </div>
+            <span class="font-mono text-xs uppercase tracking-widest text-wa mb-1">Privacy WA Panic Shield Active</span>
+            <h3 class="font-display font-bold text-xl sm:text-2xl text-white">WhatsApp Web is Locked</h3>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1 max-w-sm">
+              Enter your 4-digit Local PIN to resume viewing chats. (Demo PIN: <strong class="text-wa font-mono">1234</strong>)
+            </p>
+
+            <div class="mt-5 flex items-center gap-2">
+              <input id="simPinInput"
+                     type="password"
+                     maxlength="4"
+                     placeholder="••••"
+                     class="w-32 text-center font-mono text-xl tracking-[0.4em] px-4 py-2.5 rounded-xl bg-obsidian-850 border border-wa/40 text-white focus:outline-none focus:border-wa" />
+              <button id="unlockPinBtn"
+                      type="button"
+                      class="px-5 py-3 rounded-xl font-display font-bold text-sm bg-wa hover:bg-wa-light text-obsidian-950 transition-colors">
+                Unlock
+              </button>
+            </div>
+            <p id="pinFeedback" class="text-xs text-rose-400 mt-2 h-4"></p>
+            <button id="quickDemoUnlockBtn"
+                    type="button"
+                    class="mt-2 text-xs text-slate-400 hover:text-wa underline underline-offset-4">
+              Instant Demo Unlock (PIN: 1234)
+            </button>
+          </div>
+
+          <!-- WhatsApp Web Split Interface -->
+          <div class="grid grid-cols-1 lg:grid-cols-12 min-h-[470px]">
+
+            <!-- Left Sidebar: Chat List -->
+            <div class="lg:col-span-4 border-b lg:border-b-0 lg:border-r border-white/10 bg-[#111B21] flex flex-col">
+              <!-- Sidebar Header -->
+              <div class="px-4 py-3.5 bg-[#202C33] flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-wa to-teal-500 flex items-center justify-center font-display font-bold text-obsidian-950 text-xs">
+                    TB
+                  </div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Tron Business</div>
+                    <div class="text-[11px] text-wa flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-wa"></span> Shield Active
+                    </div>
+                  </div>
+                </div>
+                <span class="font-mono text-[10px] px-2 py-0.5 rounded bg-wa/15 text-wa border border-wa/30">Hover to Peek</span>
+              </div>
+
+              <!-- Search Bar -->
+              <div class="p-2.5 border-b border-white/5">
+                <div class="px-3 py-1.5 rounded-lg bg-[#202C33] text-xs text-slate-400 flex items-center gap-2">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                  <span>Search or start new chat</span>
+                </div>
+              </div>
+
+              <!-- Chat Item 1 (Active) -->
+              <div class="px-3.5 py-3 bg-[#2A3942] flex items-center gap-3 border-b border-white/5">
+                <div class="sim-avatar wa-avatar-blur-active w-11 h-11 rounded-full bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-300 text-sm shrink-0">
+                  AR
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="sim-name wa-blur-active font-semibold text-sm text-white truncate">Ali Raza (VIP Client)</span>
+                    <span class="text-[11px] text-wa shrink-0">2:28 PM</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 mt-0.5">
+                    <span class="sim-msg wa-blur-active text-xs text-slate-300 truncate">Send invoice &amp; jazzcash details please</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">Pending</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chat Item 2 -->
+              <div class="px-3.5 py-3 hover:bg-[#202C33]/60 flex items-center gap-3 border-b border-white/5">
+                <div class="sim-avatar wa-avatar-blur-active w-11 h-11 rounded-full bg-sky-600/30 border border-sky-400/40 flex items-center justify-center font-bold text-sky-300 text-sm shrink-0">
+                  SK
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="sim-name wa-blur-active font-semibold text-sm text-white truncate">Sarah Khan — Lahore</span>
+                    <span class="text-[11px] text-slate-400 shrink-0">1:45 PM</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 mt-0.5">
+                    <span class="sim-msg wa-blur-active text-xs text-slate-400 truncate">Payment screenshot attached ✓</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-wa/20 text-wa border border-wa/30 shrink-0">Paid</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Chat Item 3 -->
+              <div class="px-3.5 py-3 hover:bg-[#202C33]/60 flex items-center gap-3">
+                <div class="sim-avatar wa-avatar-blur-active w-11 h-11 rounded-full bg-purple-600/30 border border-purple-400/40 flex items-center justify-center font-bold text-purple-300 text-sm shrink-0">
+                  UT
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-2">
+                    <span class="sim-name wa-blur-active font-semibold text-sm text-white truncate">Usman Traders Wholesale</span>
+                    <span class="text-[11px] text-slate-400 shrink-0">Yesterday</span>
+                  </div>
+                  <div class="flex items-center justify-between gap-2 mt-0.5">
+                    <span class="sim-msg wa-blur-active text-xs text-slate-400 truncate">Tracking ID: TCS-8849201</span>
+                    <span class="px-1.5 py-0.2 rounded text-[10px] font-semibold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">Shipped</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Panel: Active Chat Window + Privacy WA Quick Reply Bar -->
+            <div class="lg:col-span-8 flex flex-col bg-[#0B141A] justify-between">
+              <!-- Active Chat Top Header -->
+              <div class="px-4 py-3 bg-[#202C33] border-b border-white/5 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="sim-avatar wa-avatar-blur-active w-9 h-9 rounded-full bg-emerald-600/30 border border-emerald-400/40 flex items-center justify-center font-bold text-emerald-300 text-xs">
+                    AR
+                  </div>
+                  <div>
+                    <div class="sim-name wa-blur-active font-semibold text-sm text-white">Ali Raza (VIP Client)</div>
+                    <div class="text-[11px] text-slate-400">online &bull; Note: Prefers evening COD delivery</div>
+                  </div>
+                </div>
+
+                <!-- Order Status Quick Tag Selector -->
+                <div class="flex items-center gap-1.5">
+                  <span class="text-[11px] text-slate-400 hidden sm:inline">Order Tag:</span>
+                  <select id="simOrderTag"
+                          aria-label="Order Status Tag"
+                          class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-obsidian-950 border border-wa/40 text-wa focus:outline-none">
+                    <option value="Pending">🟡 Pending</option>
+                    <option value="Paid">🟢 Paid</option>
+                    <option value="Shipped">🔵 Shipped</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Chat Messages Feed -->
+              <div id="simChatFeed" class="p-4 sm:p-5 space-y-3 flex-1 overflow-y-auto max-h-[260px]">
+                <!-- Incoming Message -->
+                <div class="max-w-[82%] rounded-2xl rounded-tl-sm bg-[#202C33] px-3.5 py-2.5 text-xs sm:text-sm text-slate-100 shadow">
+                  <p class="sim-msg wa-blur-active">Assalam-o-Alaikum! I want to confirm 3 units of the Pro Bundle. Please share total price and delivery time.</p>
+                  <span class="block text-[10px] text-slate-400 text-right mt-1">2:27 PM</span>
+                </div>
+
+                <!-- Outgoing Message -->
+                <div class="ml-auto max-w-[82%] rounded-2xl rounded-tr-sm bg-[#005C4B] px-3.5 py-2.5 text-xs sm:text-sm text-white shadow">
+                  <p class="sim-msg wa-blur-active">Walaikum Assalam! Your VIP bundle is reserved. Hover over any blurred bubble anytime to read clearly.</p>
+                  <span class="block text-[10px] text-emerald-200/80 text-right mt-1">2:28 PM ✓✓</span>
+                </div>
+              </div>
+
+              <!-- Privacy WA 1-Click Quick Reply Dock -->
+              <div class="bg-[#182229] border-t border-wa/25 px-3 sm:px-4 pt-2.5 pb-3">
+                <div class="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar">
+                  <span class="font-mono text-[10px] uppercase tracking-wider text-wa shrink-0 flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    Quick Replies:
+                  </span>
+                  <button type="button"
+                          data-reply="Price & Delivery: Rs. 4,500 total with Free Express 24h Delivery across Pakistan! 🚚"
+                          class="quick-reply-pill shrink-0 px-3 py-1 rounded-full text-xs font-medium bg-obsidian-950 hover:bg-wa hover:text-obsidian-950 text-emerald-300 border border-wa/35 transition-all">
+                    ⚡ Price &amp; Delivery Details
+                  </button>
+                  <button type="button"
+                          data-reply="Order Confirmed ✅ Thank you! Your parcel is packed and scheduled for dispatch today."
+                          class="quick-reply-pill shrink-0 px-3 py-1 rounded-full text-xs font-medium bg-obsidian-950 hover:bg-wa hover:text-obsidian-950 text-emerald-300 border border-wa/35 transition-all">
+                    ✅ Order Confirmed
+                  </button>
+                  <button type="button"
+                          data-reply="Payment Received 🙏 JazakAllah! Sharing your live courier tracking number shortly."
+                          class="quick-reply-pill shrink-0 px-3 py-1 rounded-full text-xs font-medium bg-obsidian-950 hover:bg-wa hover:text-obsidian-950 text-emerald-300 border border-wa/35 transition-all">
+                    🙏 Payment Received
+                  </button>
+                </div>
+
+                <!-- Simulated Input Box -->
+                <div class="flex items-center gap-2 mt-1">
+                  <input id="simCustomInput"
+                         type="text"
+                         placeholder="Click a Quick Reply above or type a message..."
+                         class="flex-1 px-3.5 py-2 rounded-xl bg-[#2A3942] text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-wa" />
+                  <button id="simSendBtn"
+                          type="button"
+                          aria-label="Send Simulated Message"
+                          class="p-2.5 rounded-xl bg-wa hover:bg-wa-light text-obsidian-950 font-bold transition-transform active:scale-95">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M12 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         4. 6-CARD FEATURE GRID WITH SPOTLIGHT & INTERACTIVE POPUPS
+         ========================================================= -->
+    <section id="features" class="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 scroll-mt-20">
+      <div class="max-w-7xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-14 reveal-up">
+          <span class="inline-block font-mono text-xs font-semibold uppercase tracking-widest text-wa px-3 py-1 rounded-full bg-wa/10 border border-wa/25 mb-3">
+            Built for Speed &amp; Privacy
+          </span>
+          <h2 class="font-display font-extrabold text-2xl sm:text-4xl lg:text-5xl text-white">
+            Every Tool You Need on <span class="text-wa">WhatsApp Web</span>
+          </h2>
+          <p class="mt-4 text-slate-400 text-sm sm:text-base">
+            Move your cursor across the cards and <strong class="text-slate-200">click any card</strong> to inspect live shortcuts, architecture, and workflow previews.
+          </p>
+        </div>
+
+        <!-- 3x2 Symmetrical Grid with Mouse-Tracking Spotlight -->
+        <div id="featureSpotlightGrid" class="spotlight-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+          <!-- CARD 1 -->
+          <div role="button" tabindex="0" data-feature-id="blur"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-wa/15 border border-wa/30 flex items-center justify-center text-wa">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                </div>
+                <span class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">Hover-to-Reveal</span>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">Granular Chat &amp; Media Blur</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Independently blur contact names, profile avatars, recent chat previews, message bubbles, and shared photos/videos — hover over any item to reveal instantly.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span class="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+          <!-- CARD 2 -->
+          <div role="button" tabindex="0" data-feature-id="panic"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up" style="transition-delay: 70ms;">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-center text-rose-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <kbd class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-300 border border-rose-500/30">Alt + X</kbd>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">Alt+X Instant Panic Shield</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Someone walks behind your desk or asks to share your screen? Tap <strong class="text-slate-200">Alt+X</strong> once to blackout and lock your entire WhatsApp Web workspace in 0ms.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+          <!-- CARD 3 -->
+          <div role="button" tabindex="0" data-feature-id="pin"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up" style="transition-delay: 140ms;">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                </div>
+                <span class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">100% Offline</span>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">Local PIN Lock &amp; Recovery</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Step away from your PC without logging out of WhatsApp Web. Lock your tab with a custom PIN and a built-in offline recovery code stored strictly on your device.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+          <!-- CARD 4 -->
+          <div role="button" tabindex="0" data-feature-id="quickreply"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-wa/15 border border-wa/30 flex items-center justify-center text-wa">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+                </div>
+                <span class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-wa/15 text-wa border border-wa/30">1-Click Send</span>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">1-Click Quick Replies</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Stop retyping prices, bank details, addresses, and FAQs. Save unlimited reusable templates right above your chat input bar and send them with a single click.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+          <!-- CARD 5 -->
+          <div role="button" tabindex="0" data-feature-id="orders"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up" style="transition-delay: 70ms;">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <span class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">Mini CRM</span>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">Order &amp; Payment Status Tracker</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Turn WhatsApp Web into a clean order desk. Tag customer conversations as <strong class="text-amber-300">Pending</strong>, <strong class="text-wa">Paid</strong>, <strong class="text-sky-300">Shipped</strong>, or <strong class="text-emerald-300">Delivered</strong> without spreadsheets.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+          <!-- CARD 6 -->
+          <div role="button" tabindex="0" data-feature-id="notes"
+               class="spotlight-card feature-trigger p-6 sm:p-7 cursor-pointer flex flex-col justify-between reveal-up" style="transition-delay: 140ms;">
+            <div>
+              <div class="flex items-center justify-between mb-5">
+                <div class="w-12 h-12 rounded-2xl bg-teal-500/15 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                </div>
+                <span class="font-mono text-[11px] px-2.5 py-1 rounded-full bg-white/5 text-slate-300 border border-white/10">Local Storage</span>
+              </div>
+              <h3 class="font-display font-bold text-xl text-white mb-2.5">Private Customer Chat Notes</h3>
+              <p class="text-sm text-slate-400 leading-relaxed">
+                Attach persistent private notes to any contact — save delivery addresses, sizes, follow-up dates, or VIP preferences right inside your local browser storage.
+              </p>
+            </div>
+            <div class="mt-6 pt-4 border-t border-white/5 flex items-center justify-between text-xs font-semibold text-wa">
+              <span>Click to inspect feature</span>
+              <span>&rarr;</span>
+            </div>
+            <div class="card-line-sweep"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         5. HIGH-CONTRAST COMPARISON SECTION
+         ========================================================= -->
+    <section id="comparison" class="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 border-t border-white/5 bg-obsidian-900/35 scroll-mt-20">
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-12 reveal-up">
+          <span class="inline-block font-mono text-xs font-semibold uppercase tracking-widest text-wa px-3 py-1 rounded-full bg-wa/10 border border-wa/25 mb-3">
+            Why Professionals Switch
+          </span>
+          <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-white">
+            Privacy WA vs. <span class="text-slate-400">Bloated Extensions</span>
+          </h2>
+          <p class="mt-3 text-slate-400 text-sm sm:text-base">
+            Unlike heavy bulk-sender tools that harvest contacts or risk WhatsApp account bans, Privacy WA is engineered for pure speed, security, and daily productivity.
+          </p>
+        </div>
+
+        <div class="glass-panel rounded-3xl overflow-hidden border border-white/10 shadow-2xl reveal-up">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-white/10 bg-obsidian-950/70">
+                  <th class="py-4 px-5 sm:px-7 font-display font-bold text-sm sm:text-base text-slate-300">Feature &amp; Architecture</th>
+                  <th class="py-4 px-5 sm:px-7 font-display font-extrabold text-sm sm:text-base text-wa bg-wa/10">
+                    Privacy WA (v1.2.3)
+                  </th>
+                  <th class="py-4 px-5 sm:px-7 font-display font-semibold text-sm sm:text-base text-slate-400">
+                    Typical Bulk / Cluttered Tools
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-white/5 text-xs sm:text-sm">
+                <tr>
+                  <td class="py-4 px-5 sm:px-7 font-medium text-white">Data Storage &amp; Privacy</td>
+                  <td class="py-4 px-5 sm:px-7 text-emerald-300 font-semibold bg-wa/[0.04]">✓ 100% Local Browser Storage (Zero Servers)</td>
+                  <td class="py-4 px-5 sm:px-7 text-slate-400">✕ Cloud sync &amp; third-party tracking scripts</td>
+                </tr>
+                <tr>
+                  <td class="py-4 px-5 sm:px-7 font-medium text-white">WhatsApp Account Safety</td>
+                  <td class="py-4 px-5 sm:px-7 text-emerald-300 font-semibold bg-wa/[0.04]">✓ 100% Safe UI Layer (Zero Spam Risk)</td>
+                  <td class="py-4 px-5 sm:px-7 text-rose-400">✕ High ban risk from automated bulk blasts</td>
+                </tr>
+                <tr>
+                  <td class="py-4 px-5 sm:px-7 font-medium text-white">Instant Blur + Alt+X Panic Lock</td>
+                  <td class="py-4 px-5 sm:px-7 text-emerald-300 font-semibold bg-wa/[0.04]">✓ Built-in Granular Blur + Local PIN Lock</td>
+                  <td class="py-4 px-5 sm:px-7 text-slate-400">✕ Requires separate paid privacy plugins</td>
+                </tr>
+                <tr>
+                  <td class="py-4 px-5 sm:px-7 font-medium text-white">1-Click Quick Replies &amp; Order Tags</td>
+                  <td class="py-4 px-5 sm:px-7 text-emerald-300 font-semibold bg-wa/[0.04]">✓ Included Free with Local Chat Notes</td>
+                  <td class="py-4 px-5 sm:px-7 text-slate-400">✕ Locked behind monthly subscriptions</td>
+                </tr>
+                <tr>
+                  <td class="py-4 px-5 sm:px-7 font-medium text-white">Browser Memory &amp; Speed</td>
+                  <td class="py-4 px-5 sm:px-7 text-emerald-300 font-semibold bg-wa/[0.04]">✓ Ultra-lightweight Vanilla JS (&lt; 60 KB)</td>
+                  <td class="py-4 px-5 sm:px-7 text-slate-400">✕ Heavy bundles that slow down WhatsApp Web</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         6. FAQ ACCORDION & ETHICAL OPT-IN UPDATES BOX
+         ========================================================= -->
+    <section id="faq" class="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 scroll-mt-20">
+      <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-12 reveal-up">
+          <span class="inline-block font-mono text-xs font-semibold uppercase tracking-widest text-wa px-3 py-1 rounded-full bg-wa/10 border border-wa/25 mb-3">
+            Clear Answers
+          </span>
+          <h2 class="font-display font-extrabold text-2xl sm:text-4xl text-white">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        <!-- FAQ Accordion -->
+        <div class="space-y-3.5 reveal-up" id="faqContainer">
+
+          <div class="faq-item glass-panel rounded-2xl border border-white/10 active">
+            <button type="button" class="faq-btn w-full px-5 sm:px-6 py-4.5 text-left flex items-center justify-between gap-4 font-display font-bold text-sm sm:text-base text-white">
+              <span>Does Privacy WA read, collect, or upload my WhatsApp messages?</span>
+              <span class="faq-icon text-wa font-mono text-xl transition-transform duration-200 rotate-45">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-inner px-5 sm:px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Never. Privacy WA runs 100% locally inside your browser. Your blur preferences, Quick Replies, PIN lock, and customer notes are saved strictly in Chrome's local storage (`chrome.storage.local`). Zero data is ever sent to any external server.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item glass-panel rounded-2xl border border-white/10">
+            <button type="button" class="faq-btn w-full px-5 sm:px-6 py-4.5 text-left flex items-center justify-between gap-4 font-display font-bold text-sm sm:text-base text-white">
+              <span>How does the Alt+X Panic Shield &amp; PIN Lock work?</span>
+              <span class="faq-icon text-wa font-mono text-xl transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-inner px-5 sm:px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Whenever you are on WhatsApp Web, pressing <kbd class="font-mono text-xs text-wa">Alt+X</kbd> (or clicking the lock icon) immediately covers your screen with a sleek privacy shield. If you set a Local PIN, nobody can view your chats until your PIN or offline recovery code is entered.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item glass-panel rounded-2xl border border-white/10">
+            <button type="button" class="faq-btn w-full px-5 sm:px-6 py-4.5 text-left flex items-center justify-between gap-4 font-display font-bold text-sm sm:text-base text-white">
+              <span>Does it work on both Google Chrome and Microsoft Edge?</span>
+              <span class="faq-icon text-wa font-mono text-xl transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-inner px-5 sm:px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Yes! Privacy WA (v1.2.3) is built on Manifest V3 and works seamlessly on Google Chrome, Microsoft Edge, Brave, and other Chromium-based desktop browsers.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item glass-panel rounded-2xl border border-white/10">
+            <button type="button" class="faq-btn w-full px-5 sm:px-6 py-4.5 text-left flex items-center justify-between gap-4 font-display font-bold text-sm sm:text-base text-white">
+              <span>What if I forget my Local PIN Lock?</span>
+              <span class="faq-icon text-wa font-mono text-xl transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-inner px-5 sm:px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                When you configure your Local PIN inside Privacy WA, the extension generates an offline recovery code so you can safely reset your PIN locally without losing your saved Quick Replies or customer chat notes.
+              </div>
+            </div>
+          </div>
+
+          <div class="faq-item glass-panel rounded-2xl border border-white/10">
+            <button type="button" class="faq-btn w-full px-5 sm:px-6 py-4.5 text-left flex items-center justify-between gap-4 font-display font-bold text-sm sm:text-base text-white">
+              <span>Is Privacy WA completely free to use?</span>
+              <span class="faq-icon text-wa font-mono text-xl transition-transform duration-200">+</span>
+            </button>
+            <div class="faq-answer">
+              <div class="faq-inner px-5 sm:px-6 pb-5 text-xs sm:text-sm text-slate-300 leading-relaxed">
+                Yes! Privacy WA is free of charge on the Chrome Web Store with no credit card or account registration required.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Ethical Opt-In Updates & Quick-Reply Template Pack Box -->
+        <div class="mt-14 rounded-3xl p-6 sm:p-9 bg-gradient-to-br from-obsidian-800 via-obsidian-900 to-emerald-950/40 border border-wa/30 shadow-xl reveal-up">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+            <div class="lg:col-span-7">
+              <span class="font-mono text-xs uppercase tracking-wider text-wa">Free Business Resource</span>
+              <h3 class="font-display font-extrabold text-xl sm:text-2xl text-white mt-1">
+                Get Free WhatsApp Quick-Reply Templates &amp; Release Updates
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-300 mt-2 leading-relaxed">
+                Join the Tron Business update list to receive ready-to-import customer support &amp; e-commerce reply scripts plus notifications when Privacy WA v1.3 drops.
+              </p>
+            </div>
+            <div class="lg:col-span-5">
+              <form id="optInForm" class="space-y-2.5" novalidate>
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <input id="optInEmail"
+                         type="email"
+                         required
+                         placeholder="you@business.com"
+                         class="flex-1 px-4 py-3 rounded-xl bg-obsidian-950/90 border border-white/15 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-wa" />
+                  <button type="submit"
+                          class="px-5 py-3 rounded-xl font-display font-bold text-sm bg-wa hover:bg-wa-light text-obsidian-950 transition-colors shrink-0">
+                    Get Templates
+                  </button>
+                </div>
+                <p id="optInMessage" class="text-xs text-slate-400 min-h-[18px]">
+                  Zero spam. Unsubscribe anytime in one click.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================
+       7. PROFESSIONAL FOOTER
+       ========================================================= -->
+  <footer class="relative z-10 border-t border-white/10 bg-obsidian-950 pt-14 pb-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-white/10">
+
+        <!-- Brand Column -->
+        <div class="md:col-span-5 space-y-4">
+          <a href="https://privacywa.tronbusiness.shop" class="inline-flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-wa/15 border border-wa/40 flex items-center justify-center text-wa">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                <rect x="9" y="11" width="6" height="5" rx="1" />
+                <path d="M10 11V9a2 2 0 1 1 4 0v2" />
+              </svg>
+            </div>
+            <span class="font-display font-extrabold text-lg text-white">Privacy <span class="text-wa">WA</span></span>
+          </a>
+          <p class="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-sm">
+            Instant WhatsApp Web privacy blur, Alt+X Panic Shield, Local PIN Lock, and 1-Click Quick Replies — engineered by <strong class="text-slate-200">Tron Business</strong> for speed and 100% local data privacy.
+          </p>
+        </div>
+
+        <!-- Product Links -->
+        <div class="md:col-span-3 space-y-2.5 text-sm">
+          <div class="font-display font-bold text-white mb-3">Product</div>
+          <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener noreferrer" class="block text-slate-400 hover:text-wa transition-colors">Chrome Web Store</a>
+          <a href="https://www.youtube.com/watch?v=-C9UmEVFfrE" target="_blank" rel="noopener noreferrer" class="block text-slate-400 hover:text-wa transition-colors">YouTube Video Tour</a>
+          <a href="#simulator" class="block text-slate-400 hover:text-wa transition-colors">Interactive Demo</a>
+          <a href="#features" class="block text-slate-400 hover:text-wa transition-colors">Features Overview</a>
+        </div>
+
+        <!-- Official & Legal Links -->
+        <div class="md:col-span-4 space-y-2.5 text-sm">
+          <div class="font-display font-bold text-white mb-3">Official &amp; Legal</div>
+          <a href="https://privacywa.tronbusiness.shop" class="block text-slate-400 hover:text-wa transition-colors">Official Homepage</a>
+          <a href="https://privacywa.tronbusiness.shop/support.html" class="block text-slate-400 hover:text-wa transition-colors">Help &amp; Support Center</a>
+          <a href="https://privacywa.tronbusiness.shop/privacy.html" class="block text-slate-400 hover:text-wa transition-colors">Privacy Policy (Zero Data Collection)</a>
+        </div>
+
+      </div>
+
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+        <p>&copy; 2026 Tron Business. All rights reserved. Privacy WA is an independent browser extension and is not affiliated with WhatsApp LLC or Meta Platforms, Inc.</p>
+        <span class="font-mono text-slate-400">ID: mkmfhpljkmnedafkfplpbkkggkhniegk</span>
       </div>
     </div>
   </footer>
 
-  <!-- Feature Detail Modal Popup -->
-  <div class="modal-backdrop" id="featureModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="modal-card">
-      <div class="modal-head">
-        <div>
-          <span class="brand-badge" id="modalTag">FEATURE</span>
-          <h3 id="modalTitle" style="font-size:1.35rem; font-weight:900; margin-top:8px;"></h3>
+  <!-- =========================================================
+       INTERACTIVE SPRING-ANIMATED FEATURE MODAL POPUP
+       ========================================================= -->
+  <div id="featureModal"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="modalTitle"
+       class="modal-backdrop fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="modal-panel relative w-full max-w-xl rounded-3xl bg-obsidian-900 border border-wa/35 shadow-[0_25px_80px_-15px_rgba(37,211,102,0.3)] overflow-hidden">
+
+      <!-- Modal Top Accent Bar -->
+      <div class="h-1.5 w-full bg-gradient-to-r from-wa via-emerald-400 to-teal-400"></div>
+
+      <div class="p-6 sm:p-8">
+        <!-- Header -->
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span id="modalBadge" class="font-mono text-xs font-semibold px-3 py-1 rounded-full bg-wa/15 text-wa border border-wa/30">
+              Feature Spec
+            </span>
+          </div>
+          <button id="closeModalBtn"
+                  type="button"
+                  aria-label="Close Modal"
+                  class="p-2 rounded-xl bg-obsidian-800 hover:bg-white/10 text-slate-300 hover:text-white transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
         </div>
-        <button class="modal-close" id="closeModal" aria-label="Close">×</button>
+
+        <h3 id="modalTitle" class="font-display font-extrabold text-2xl sm:text-3xl text-white mt-4">
+          Feature Title
+        </h3>
+        <p id="modalDesc" class="text-sm sm:text-base text-slate-300 mt-2.5 leading-relaxed">
+          Feature description goes here.
+        </p>
+
+        <!-- Visual UI / Shortcut Diagram Box -->
+        <div id="modalVisual" class="mt-5 p-4 rounded-2xl bg-obsidian-950 border border-white/10 font-mono text-xs text-emerald-300">
+        </div>
+
+        <!-- 3 Bullet Benefits -->
+        <ul id="modalBullets" class="mt-5 space-y-2.5 text-xs sm:text-sm text-slate-200">
+        </ul>
+
+        <!-- Modal Footer Actions -->
+        <div class="mt-7 pt-5 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-display font-bold text-sm bg-wa hover:bg-wa-light text-obsidian-950 shadow-lg shadow-wa/25 transition-all">
+            <span>Get This Feature Free</span>
+            <span>&rarr;</span>
+          </a>
+          <button id="modalTrySimBtn"
+                  type="button"
+                  class="w-full sm:w-auto px-5 py-3 rounded-xl font-display font-semibold text-sm bg-obsidian-800 hover:bg-obsidian-700 text-slate-200 border border-white/10 transition-colors">
+            Test in Live Simulator
+          </button>
+        </div>
       </div>
-      <p id="modalDesc" style="color:var(--muted); font-size:0.94rem;"></p>
-      <ul class="modal-list" id="modalPoints"></ul>
-      <a href="https://chromewebstore.google.com/detail/mkmfhpljkmnedafkfplpbkkggkhniegk" target="_blank" rel="noopener" class="btn btn-primary" style="width:100%;">
-        Get Privacy WA Free on Chrome
-      </a>
     </div>
   </div>
 
+  <!-- =========================================================
+       LIGHTWEIGHT 60FPS INTERACTIVE JAVASCRIPT
+       ========================================================= -->
   <script>
-    // 1. Mouse-tracking Spotlight on Cards (60fps)
-    document.querySelectorAll('.s-card').forEach(card => {
-      card.addEventListener('pointermove', e => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', (e.clientX - rect.left) + 'px');
-        card.style.setProperty('--my', (e.clientY - rect.top) + 'px');
-      });
-    });
+    document.addEventListener('DOMContentLoaded', () => {
+      /* 1. Mobile Navigation Drawer */
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      if (mobileMenuBtn && mobileMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+          mobileMenu.classList.toggle('hidden');
+        });
+        mobileMenu.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+      }
 
-    // 2. Interactive WhatsApp Simulator Toggles
-    const waMock = document.getElementById('waMock');
-    document.querySelectorAll('.toggle-item').forEach(item => {
-      item.addEventListener('click', () => {
-        item.classList.toggle('active');
-        waMock.classList.toggle(item.dataset.toggle);
-      });
-    });
+      /* 2. 60fps Mouse-Tracking Radial Spotlight Across Feature Cards */
+      const spotlightGrid = document.getElementById('featureSpotlightGrid');
+      const spotlightCards = document.querySelectorAll('.spotlight-card');
+      if (spotlightGrid && spotlightCards.length) {
+        let rafPending = false;
+        let lastEvent = null;
 
-    // Quick Reply Live Insert
-    const waMessages = document.getElementById('waMessages');
-    document.querySelectorAll('.qr-chip').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const div = document.createElement('div');
-        div.className = 'msg out';
-        const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        div.innerHTML = `${btn.dataset.reply}<span class="msg-time">${now} ✓✓</span>`;
-        waMessages.appendChild(div);
-        waMessages.scrollTop = waMessages.scrollHeight;
-      });
-    });
+        spotlightGrid.addEventListener('mousemove', (e) => {
+          lastEvent = e;
+          if (!rafPending) {
+            rafPending = true;
+            requestAnimationFrame(() => {
+              if (lastEvent) {
+                spotlightCards.forEach((card) => {
+                  const rect = card.getBoundingClientRect();
+                  const x = lastEvent.clientX - rect.left;
+                  const y = lastEvent.clientY - rect.top;
+                  card.style.setProperty('--mouse-x', `${x}px`);
+                  card.style.setProperty('--mouse-y', `${y}px`);
+                });
+              }
+              rafPending = false;
+            });
+          }
+        });
+      }
 
-    // 3. Alt+X Panic Shield & PIN Lock (Demo PIN: 1234)
-    const pinOverlay = document.getElementById('pinOverlay');
-    const pinInput = document.getElementById('pinInput');
-    const pinError = document.getElementById('pinError');
-    const triggerPanic = document.getElementById('triggerPanic');
-    const unlockBtn = document.getElementById('unlockBtn');
-
-    function openPanicShield() {
-      pinOverlay.classList.add('open');
-      pinError.textContent = '';
-      pinInput.value = '';
-      setTimeout(() => pinInput.focus(), 60);
-    }
-    function tryUnlock() {
-      if (pinInput.value.trim() === '1234') {
-        pinOverlay.classList.remove('open');
-        pinError.textContent = '';
+      /* 3. Scroll Reveal IntersectionObserver */
+      const revealEls = document.querySelectorAll('.reveal-up');
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              observer.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.12 });
+        revealEls.forEach((el) => observer.observe(el));
       } else {
-        pinError.textContent = 'Wrong PIN! Try demo PIN: 1234';
-        pinInput.value = '';
-        pinInput.focus();
+        revealEls.forEach((el) => el.classList.add('is-visible'));
       }
-    }
 
-    triggerPanic.addEventListener('click', openPanicShield);
-    unlockBtn.addEventListener('click', tryUnlock);
-    pinInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-    window.addEventListener('keydown', e => {
-      if (e.altKey && e.key.toLowerCase() === 'x') {
-        e.preventDefault();
-        pinOverlay.classList.contains('open') ? pinOverlay.classList.remove('open') : openPanicShield();
+      /* 4. Interactive WhatsApp Web Privacy Simulator */
+      const simBlurNames = document.getElementById('simBlurNames');
+      const simBlurMsgs = document.getElementById('simBlurMsgs');
+      const simBlurPhotos = document.getElementById('simBlurPhotos');
+
+      function applySimulatorBlurs() {
+        document.querySelectorAll('.sim-name').forEach(el => {
+          el.classList.toggle('wa-blur-active', simBlurNames.checked);
+        });
+        document.querySelectorAll('.sim-msg').forEach(el => {
+          el.classList.toggle('wa-blur-active', simBlurMsgs.checked);
+        });
+        document.querySelectorAll('.sim-avatar').forEach(el => {
+          el.classList.toggle('wa-avatar-blur-active', simBlurPhotos.checked);
+        });
       }
-      if (e.key === 'Escape') {
-        document.getElementById('featureModal').classList.remove('open');
-      }
-    });
 
-    // 4. Feature Card Modal Popups
-    const modalData = {
-      blur: {
-        tag: 'VISUAL PRIVACY',
-        title: 'Granular Chat & Media Blur',
-        desc: 'Control exactly what stays hidden on your screen when working in public spaces, retail counters, or Zoom/Meet calls.',
-        points: [
-          'Separate toggles for messages, sidebar previews, contact names, avatars & media',
-          'Instant smooth reveal simply by hovering your mouse cursor',
-          'Remembers your exact preferences across browser restarts'
-        ]
-      },
-      panic: {
-        tag: 'INSTANT SECURITY',
-        title: 'Alt+X Panic Shield & PIN Lock',
-        desc: 'Lock down your entire WhatsApp Web tab in a split second whenever someone walks behind your desk.',
-        points: [
-          'Global Alt+X keyboard shortcut activates shield immediately',
-          'Custom 4-digit local PIN protection for unattended computers',
-          'Built-in offline Recovery Code generator in v1.2.3'
-        ]
-      },
-      quickreply: {
-        tag: 'PRODUCTIVITY',
-        title: '1-Click Quick Replies',
-        desc: 'Stop typing the same bank account, store address, or product price 50 times a day.',
-        points: [
-          'Create unlimited reusable canned responses for support & sales',
-          'Insert directly into the active WhatsApp chat box in 1 click',
-          'Works seamlessly alongside WhatsApp Web formatting & emojis'
-        ]
-      },
-      orders: {
-        tag: 'BUSINESS WORKFLOW',
-        title: 'Order & Payment Status Tracking',
-        desc: 'Turn WhatsApp Web into a clean mini-desk for shop owners, freelancers, and e-commerce teams.',
-        points: [
-          'Label chats with Paid, Pending, COD, or Dispatched badges',
-          'Spot unpaid or urgent orders instantly while scanning chats',
-          'Zero monthly CRM fees — 100% free and offline-first'
-        ]
-      },
-      notes: {
-        tag: 'CUSTOMER CONTEXT',
-        title: 'Private Per-Chat Notes',
-        desc: 'Keep important details attached to each contact without cluttering the actual chat thread.',
-        points: [
-          'Save shipping addresses, agreed prices, or follow-up dates',
-          'Visible only to you inside your local Chrome browser',
-          'Instant auto-save with zero lag'
-        ]
-      },
-      local: {
-        tag: 'ZERO-SERVER ARCHITECTURE',
-        title: '100% Local Privacy Guarantee',
-        desc: 'Privacy WA is engineered with strict Chrome Web Store Manifest V3 privacy standards.',
-        points: [
-          'Zero external API calls — your messages never leave your device',
-          'No telemetry, no ad trackers, and no account registration required',
-          'Minimal host permission strictly scoped to web.whatsapp.com'
-        ]
-      }
-    };
-
-    const modal = document.getElementById('featureModal');
-    const modalTag = document.getElementById('modalTag');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-    const modalPoints = document.getElementById('modalPoints');
-
-    document.querySelectorAll('.s-card[data-modal]').forEach(card => {
-      card.addEventListener('click', () => {
-        const d = modalData[card.dataset.modal];
-        if (!d) return;
-        modalTag.textContent = d.tag;
-        modalTitle.textContent = d.title;
-        modalDesc.textContent = d.desc;
-        modalPoints.innerHTML = d.points.map(p => `<li>${p}</li>`).join('');
-        modal.classList.add('open');
+      [simBlurNames, simBlurMsgs, simBlurPhotos].forEach(toggle => {
+        if (toggle) toggle.addEventListener('change', applySimulatorBlurs);
       });
-    });
 
-    document.getElementById('closeModal').addEventListener('click', () => modal.classList.remove('open'));
-    modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+      /* Panic Shield & PIN Lock Simulation (Button + Real Alt+X Shortcut) */
+      const panicOverlay = document.getElementById('panicShieldOverlay');
+      const triggerPanicBtn = document.getElementById('triggerPanicBtn');
+      const simPinInput = document.getElementById('simPinInput');
+      const unlockPinBtn = document.getElementById('unlockPinBtn');
+      const quickDemoUnlockBtn = document.getElementById('quickDemoUnlockBtn');
+      const pinFeedback = document.getElementById('pinFeedback');
 
-    // 5. Smooth FAQ Accordion
-    document.querySelectorAll('.faq-q').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const item = btn.parentElement;
-        const wasOpen = item.classList.contains('open');
-        document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
-        if (!wasOpen) item.classList.add('open');
+      function togglePanicShield(forceState) {
+        const shouldOpen = typeof forceState === 'boolean'
+          ? forceState
+          : panicOverlay.classList.contains('hidden');
+        if (shouldOpen) {
+          panicOverlay.classList.remove('hidden');
+          pinFeedback.textContent = '';
+          simPinInput.value = '';
+          setTimeout(() => simPinInput.focus(), 60);
+        } else {
+          panicOverlay.classList.add('hidden');
+        }
+      }
+
+      if (triggerPanicBtn) {
+        triggerPanicBtn.addEventListener('click', () => togglePanicShield(true));
+      }
+
+      function attemptUnlock() {
+        if (simPinInput.value.trim() === '1234') {
+          togglePanicShield(false);
+        } else {
+          pinFeedback.textContent = 'Incorrect PIN. Use demo PIN 1234 to unlock.';
+          simPinInput.value = '';
+          simPinInput.focus();
+        }
+      }
+
+      if (unlockPinBtn) unlockPinBtn.addEventListener('click', attemptUnlock);
+      if (simPinInput) {
+        simPinInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') attemptUnlock();
+        });
+      }
+      if (quickDemoUnlockBtn) {
+        quickDemoUnlockBtn.addEventListener('click', () => {
+          simPinInput.value = '1234';
+          attemptUnlock();
+        });
+      }
+
+      /* Listen for Alt+X keyboard shortcut on the page */
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && (e.key === 'x' || e.key === 'X')) {
+          e.preventDefault();
+          togglePanicShield();
+        }
       });
+
+      /* Quick Reply Pills & Simulated Message Sending */
+      const simChatFeed = document.getElementById('simChatFeed');
+      const simCustomInput = document.getElementById('simCustomInput');
+      const simSendBtn = document.getElementById('simSendBtn');
+
+      function appendSimulatedOutgoing(text) {
+        if (!text.trim() || !simChatFeed) return;
+        const bubble = document.createElement('div');
+        bubble.className = 'ml-auto max-w-[82%] rounded-2xl rounded-tr-sm bg-[#005C4B] px-3.5 py-2.5 text-xs sm:text-sm text-white shadow transition-all';
+        const p = document.createElement('p');
+        p.className = simBlurMsgs && simBlurMsgs.checked ? 'sim-msg wa-blur-active' : 'sim-msg';
+        p.textContent = text;
+        const meta = document.createElement('span');
+        meta.className = 'block text-[10px] text-emerald-200/80 text-right mt-1';
+        meta.textContent = 'Just now ✓✓';
+        bubble.appendChild(p);
+        bubble.appendChild(meta);
+        simChatFeed.appendChild(bubble);
+        simChatFeed.scrollTop = simChatFeed.scrollHeight;
+      }
+
+      document.querySelectorAll('.quick-reply-pill').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const msg = btn.getAttribute('data-reply') || '';
+          appendSimulatedOutgoing(msg);
+        });
+      });
+
+      if (simSendBtn && simCustomInput) {
+        simSendBtn.addEventListener('click', () => {
+          appendSimulatedOutgoing(simCustomInput.value);
+          simCustomInput.value = '';
+        });
+        simCustomInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            appendSimulatedOutgoing(simCustomInput.value);
+            simCustomInput.value = '';
+          }
+        });
+      }
+
+      /* 5. Interactive Feature Modal Popups */
+      const featureData = {
+        blur: {
+          badge: 'Visual Privacy Engine',
+          title: 'Granular Chat & Media Blur',
+          desc: 'Control exactly what stays hidden on WhatsApp Web with hardware-accelerated CSS filters that never slow down scrolling or typing.',
+          visual: 'Blur Layers: [✓ Contact Names]  [✓ Avatars]  [✓ Message Previews]  [✓ Media Thumbnails]\nPeek Mode:   Hover mouse pointer over any blurred bubble -> 0ms clear reveal',
+          bullets: [
+            'Independent toggles for contact names, profile pictures, recent message list, and chat media.',
+            'Smart hover-to-reveal lets you read individual messages without exposing the rest of your screen.',
+            'Remembers your exact blur preferences automatically across browser restarts.'
+          ]
+        },
+        panic: {
+          badge: 'Shortcut: Alt + X',
+          title: 'Alt+X Instant Panic Shield',
+          desc: 'Designed for open offices, coworking spaces, and live screen-sharing calls where unexpected notifications can pop up anytime.',
+          visual: 'Trigger:  Press [Alt] + [X] anywhere on web.whatsapp.com\nAction:   Immediate full-viewport privacy curtain + optional PIN lock engagement',
+          bullets: [
+            'Works instantaneously in under 1 millisecond with zero network latency.',
+            'Hides both the sidebar chat list and active conversation window simultaneously.',
+            'Pairs seamlessly with Local PIN Lock so onlookers cannot toggle it off.'
+          ]
+        },
+        pin: {
+          badge: '100% Local Security',
+          title: 'Local PIN Lock & Offline Recovery',
+          desc: 'Keep WhatsApp Web active on your workstation while preventing unauthorized access when you step away for coffee or meetings.',
+          visual: 'Storage:  chrome.storage.local (Encrypted Hash • Never leaves your PC)\nRecovery: Offline recovery key generated locally during PIN setup',
+          bullets: [
+            'No external servers, accounts, or cloud password syncing — 100% offline security.',
+            'Includes an offline recovery code so you never get permanently locked out.',
+            'Zero impact on incoming WhatsApp message delivery while locked.'
+          ]
+        },
+        quickreply: {
+          badge: '1-Click Productivity',
+          title: '1-Click Quick Replies',
+          desc: 'Eliminate repetitive typing for customer support, order confirmations, payment instructions, and FAQs directly inside WhatsApp Web.',
+          visual: 'Dock UI:  Injected cleanly above the WhatsApp Web message composer\nWorkflow: Click saved template pill -> Inserts & sends in 1 single action',
+          bullets: [
+            'Create, edit, and organize unlimited custom message templates locally.',
+            'One-click insertion directly into the active WhatsApp chat input box.',
+            'Safe human-initiated sending — zero automated spam or account ban risk.'
+          ]
+        },
+        orders: {
+          badge: 'Lightweight Mini-CRM',
+          title: 'Order & Payment Status Tracker',
+          desc: 'Manage small-business and e-commerce customer chats directly inside WhatsApp Web without paying for bloated CRM subscriptions.',
+          visual: 'Status Badges:  [🟡 Pending]   [🟢 Paid]   [🔵 Shipped]   [✅ Delivered]\nPersistence:    Saved locally per contact phone/chat thread',
+          bullets: [
+            'Instantly see which customers have paid and which orders still need dispatch.',
+            'Color-coded status pills keep high-volume WhatsApp inboxes organized.',
+            '100% private — your customer order tags never leave your browser.'
+          ]
+        },
+        notes: {
+          badge: 'Private Context',
+          title: 'Private Customer Chat Notes',
+          desc: 'Remember every customer detail, shipping address, preferred delivery window, or follow-up reminder right alongside their chat.',
+          visual: 'Contact Card: "Ali Raza — VIP Client"\nLocal Note:   "Prefers evening COD delivery • Size: Large • Repeat buyer"',
+          bullets: [
+            'Attach persistent private notes to any individual WhatsApp contact.',
+            'Automatically loads whenever you open that customer conversation.',
+            'Stored strictly in local browser storage with zero third-party access.'
+          ]
+        }
+      };
+
+      const featureModal = document.getElementById('featureModal');
+      const modalBadge = document.getElementById('modalBadge');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalDesc = document.getElementById('modalDesc');
+      const modalVisual = document.getElementById('modalVisual');
+      const modalBullets = document.getElementById('modalBullets');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const modalTrySimBtn = document.getElementById('modalTrySimBtn');
+
+      function openFeatureModal(key) {
+        const item = featureData[key];
+        if (!item || !featureModal) return;
+        modalBadge.textContent = item.badge;
+        modalTitle.textContent = item.title;
+        modalDesc.textContent = item.desc;
+        modalVisual.textContent = item.visual;
+        modalBullets.innerHTML = '';
+        item.bullets.forEach((b) => {
+          const li = document.createElement('li');
+          li.className = 'flex items-start gap-2.5';
+          li.innerHTML = `<span class="text-wa font-bold mt-0.5">✓</span><span>${b}</span>`;
+          modalBullets.appendChild(li);
+        });
+        featureModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeFeatureModal() {
+        if (!featureModal) return;
+        featureModal.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+
+      document.querySelectorAll('.feature-trigger').forEach((card) => {
+        card.addEventListener('click', () => {
+          openFeatureModal(card.getAttribute('data-feature-id'));
+        });
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openFeatureModal(card.getAttribute('data-feature-id'));
+          }
+        });
+      });
+
+      if (closeModalBtn) closeModalBtn.addEventListener('click', closeFeatureModal);
+      if (featureModal) {
+        featureModal.addEventListener('click', (e) => {
+          if (e.target === featureModal) closeFeatureModal();
+        });
+      }
+      if (modalTrySimBtn) {
+        modalTrySimBtn.addEventListener('click', () => {
+          closeFeatureModal();
+          const simEl = document.getElementById('simulator');
+          if (simEl) simEl.scrollIntoView({ behavior: 'smooth' });
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && featureModal && featureModal.classList.contains('open')) {
+          closeFeatureModal();
+        }
+      });
+
+      /* 6. FAQ Accordion */
+      document.querySelectorAll('.faq-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const item = btn.closest('.faq-item');
+          const icon = btn.querySelector('.faq-icon');
+          const isOpen = item.classList.contains('active');
+          document.querySelectorAll('.faq-item').forEach((other) => {
+            other.classList.remove('active');
+            const otherIcon = other.querySelector('.faq-icon');
+            if (otherIcon) otherIcon.classList.remove('rotate-45');
+          });
+          if (!isOpen) {
+            item.classList.add('active');
+            if (icon) icon.classList.add('rotate-45');
+          }
+        });
+      });
+
+      /* 7. Ethical Opt-In Template & Update Form */
+      const optInForm = document.getElementById('optInForm');
+      const optInEmail = document.getElementById('optInEmail');
+      const optInMessage = document.getElementById('optInMessage');
+      if (optInForm && optInEmail && optInMessage) {
+        optInForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const val = optInEmail.value.trim();
+          if (!val || !val.includes('@') || !val.includes('.')) {
+            optInMessage.textContent = 'Please enter a valid business or personal email address.';
+            optInMessage.className = 'text-xs text-rose-400 min-h-[18px]';
+            optInEmail.focus();
+            return;
+          }
+          optInMessage.textContent = `✓ Subscribed (${val})! Check your inbox for the Quick-Reply Template Pack.`;
+          optInMessage.className = 'text-xs text-wa font-semibold min-h-[18px]';
+          optInEmail.value = '';
+        });
+      }
     });
   </script>
 </body>
