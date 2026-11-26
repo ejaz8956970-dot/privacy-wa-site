@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy WA — Chat Blur, PIN Lock & Quick Reply | Tron Business</title>
+  <meta name="description" content="Protect your WhatsApp Web privacy with smart chat blur, hover-to-reveal, Alt+X Panic Shield, PIN lock with recovery code, and instant quick replies." />
+  <style>
+    :root { --bg:#0b141a; --card:#111b21; --card2:#18252d; --green:#00a884; --text:#e9edef; --muted:#8696a0; --border:#233138; }
+    * { box-sizing:border-box; margin:0; padding:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; }
+    body { background:var(--bg); color:var(--text); line-height:1.6; }
+    a { color:var(--green); text-decoration:none; }
+    .container { max-width:1080px; margin:0 auto; padding:0 20px; }
+    header { border-bottom:1px solid var(--border); background:rgba(11,20,26,0.92); position:sticky; top:0; z-index:10; backdrop-filter:blur(8px); }
+    .nav { display:flex; align-items:center; justify-content:space-between; height:68px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:700; font-size:18px; color:var(--text); }
+    .badge { background:rgba(0,168,132,0.16); color:var(--green); border:1px solid rgba(0,168,132,0.35); padding:3px 10px; border-radius:999px; font-size:12px; font-weight:600; }
+    .nav-links { display:flex; gap:20px; font-size:14px; }
+    .hero { padding:72px 0 56px; text-align:center; }
+    .hero h1 { font-size:clamp(30px,5vw,48px); line-height:1.15; margin:16px auto; max-width:780px; }
+    .hero p { color:var(--muted); font-size:18px; max-width:650px; margin:0 auto 28px; }
+    .cta-row { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+    .btn { display:inline-flex; align-items:center; gap:8px; padding:13px 24px; border-radius:10px; font-weight:600; font-size:15px; transition:0.15s; }
+    .btn-primary { background:var(--green); color:#06231c; }
+    .btn-primary:hover { background:#06cf9c; }
+    .btn-secondary { background:var(--card2); color:var(--text); border:1px solid var(--border); }
+    .btn-secondary:hover { border-color:var(--green); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px; margin:40px 0; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; }
+    .card h3 { font-size:17px; margin-bottom:8px; color:#fff; }
+    .card p { font-size:14px; color:var(--muted); }
+    .section-title { font-size:26px; text-align:center; margin-top:48px; }
+    .trust-box { background:linear-gradient(135deg,#0f2924,#111b21); border:1px solid rgba(0,168,132,0.35); border-radius:16px; padding:28px; margin:48px 0; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:20px; }
+    footer { border-top:1px solid var(--border); padding:32px 0; margin-top:64px; color:var(--muted); font-size:14px; }
+    .footer-flex { display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span>🛡️ Privacy WA</span>
+        <span class="badge">v1.2.3 Pro</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="support.html">Support & Guide</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <span class="badge">Official Extension by Tron Business</span>
+      <h1>Protect Your WhatsApp Web Screen & Reply Faster</h1>
+      <p>Smart chat & media blur, hover-to-reveal, instant Alt+X Panic Shield, PIN lock with recovery code, and business quick replies — stored locally in your browser.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://microsoftedge.microsoft.com/addons/detail/fjcjnbaapimegnbejbgboionnedmakak" target="_blank" rel="noopener">Get for Microsoft Edge</a>
+        <a class="btn btn-secondary" href="privacy.html">Read Privacy Policy</a>
+      </div>
+    </section>
+
+    <h2 id="features" class="section-title">Everything Included in v1.2.3 Pro</h2>
+    <section class="grid">
+      <div class="card">
+        <h3>👁️ Smart Chat & Media Blur</h3>
+        <p>Automatically blurs chat previews, contact names, profile photos, messages, and media on WhatsApp Web until you hover over them.</p>
+      </div>
+      <div class="card">
+        <h3>🛡️ Panic Shield (Alt + X)</h3>
+        <p>Press Alt + X anytime in an office, shop, or public place to immediately lock down screen visibility and block hover-reveal.</p>
+      </div>
+      <div class="card">
+        <h3>🔐 PIN Lock & Recovery Code</h3>
+        <p>Secure your extension settings with a hashed PIN, Confirm PIN protection, and a one-time recovery code (PWA-XXXXXX) in case you forget your PIN.</p>
+      </div>
+      <div class="card">
+        <h3>⚡ Quick Replies & Order Tags</h3>
+        <p>Save custom shortcut replies (like /hi) with draft-overwrite protection and organize customer chats with local order status tags and notes.</p>
+      </div>
+    </section>
+
+    <section class="trust-box">
+      <div>
+        <h3 style="font-size:20px;margin-bottom:6px;">Local-First Privacy Architecture</h3>
+        <p style="color:var(--muted);font-size:14px;max-width:640px;">Your settings, PIN hash, quick replies, and customer notes stay inside your local browser profile storage. Nothing is uploaded to external tracking servers.</p>
+      </div>
+      <a class="btn btn-secondary" href="support.html">Setup & Recovery Guide →</a>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-flex">
+      <div>© 2026 Tron Business (tronbusiness.shop) — Privacy WA Extension</div>
+      <div style="display:flex;gap:18px;">
+        <a href="index.html">Home</a>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="support.html">Support</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
