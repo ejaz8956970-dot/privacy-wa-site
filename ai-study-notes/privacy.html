@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — AI Study Notes</title>
+<style>
+:root{
+  --bg:#0b1020;--bg2:#111a33;--card:rgba(255,255,255,.06);--line:rgba(255,255,255,.12);
+  --text:#e8ecf7;--muted:#a3adc8;--accent:#5b8cff;--accent2:#8b5cf6;--code:rgba(91,140,255,.16);
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){--bg:#eef2fb;--bg2:#dfe7f8;--card:rgba(255,255,255,.75);--line:rgba(15,23,42,.1);--text:#0f172a;--muted:#475569;--code:rgba(37,99,235,.1);--accent:#2563eb}
+}
+:root[data-theme="light"]{--bg:#eef2fb;--bg2:#dfe7f8;--card:rgba(255,255,255,.75);--line:rgba(15,23,42,.1);--text:#0f172a;--muted:#475569;--code:rgba(37,99,235,.1);--accent:#2563eb}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:radial-gradient(1200px 600px at 80% -10%,var(--bg2),var(--bg));color:var(--text);line-height:1.7;min-height:100vh;padding:0 16px 48px}
+.wrap{max-width:860px;margin:0 auto}
+.hero{display:grid;grid-template-columns:1fr 200px;align-items:center;gap:24px;padding:48px 0 28px}
+.badge{display:inline-block;background:var(--code);color:var(--accent);font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:12px}
+h1{font-size:clamp(30px,6vw,46px);line-height:1.1;font-weight:800;letter-spacing:-.02em}
+.meta{font-size:13px;color:var(--muted);margin-top:10px}
+/* 3D cube */
+.scene{width:140px;height:140px;perspective:700px;justify-self:center}
+.cube{width:100%;height:100%;position:relative;transform-style:preserve-3d;animation:spin 14s linear infinite}
+.face{position:absolute;inset:0;display:grid;place-items:center;font-size:44px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(135deg,rgba(91,140,255,.35),rgba(139,92,246,.35));backdrop-filter:blur(2px)}
+.f1{transform:translateZ(70px)}.f2{transform:rotateY(90deg) translateZ(70px)}.f3{transform:rotateY(180deg) translateZ(70px)}
+.f4{transform:rotateY(-90deg) translateZ(70px)}.f5{transform:rotateX(90deg) translateZ(70px)}.f6{transform:rotateX(-90deg) translateZ(70px)}
+@keyframes spin{from{transform:rotateX(-20deg) rotateY(0)}to{transform:rotateX(-20deg) rotateY(360deg)}}
+.summary{background:linear-gradient(135deg,rgba(91,140,255,.2),rgba(139,92,246,.18));border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:14px;padding:16px 18px;margin-bottom:22px;font-size:15px}
+.grid{display:grid;gap:16px;perspective:1000px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 24px;backdrop-filter:blur(8px);transform-style:preserve-3d;transition:transform .15s ease-out,box-shadow .2s;box-shadow:0 10px 30px rgba(0,0,0,.18);will-change:transform}
+.card:hover{box-shadow:0 20px 44px rgba(91,140,255,.22)}
+.card h2{font-size:18px;font-weight:700;margin-bottom:10px;display:flex;gap:10px;align-items:center;transform:translateZ(24px)}
+.card h2 span{display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:var(--code);font-size:16px}
+.card p,.card li{font-size:14.5px;color:var(--muted);margin-bottom:8px}
+.card ul{padding-left:20px}
+.card strong{color:var(--text)}
+code{background:var(--code);color:var(--accent);padding:1px 6px;border-radius:6px;font-size:13px}
+a{color:var(--accent);font-weight:600;text-decoration:none}a:hover{text-decoration:underline}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.footer{margin-top:26px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px}
+@media(max-width:640px){.hero{grid-template-columns:1fr}.scene{order:-1;width:110px;height:110px}.face{font-size:34px}
+.f1{transform:translateZ(55px)}.f2{transform:rotateY(90deg) translateZ(55px)}.f3{transform:rotateY(180deg) translateZ(55px)}.f4{transform:rotateY(-90deg) translateZ(55px)}.f5{transform:rotateX(90deg) translateZ(55px)}.f6{transform:rotateX(-90deg) translateZ(55px)}}
+@media(prefers-reduced-motion:reduce){.cube{animation:none;transform:rotateX(-20deg) rotateY(30deg)}.card{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <span class="badge">AI Study Notes • Legal &amp; Privacy</span>
+      <h1>Privacy Policy</h1>
+      <div class="meta">Last updated: November 27, 2026 &nbsp;|&nbsp; Extension Version: 1.0.5</div>
+    </div>
+    <div class="scene" aria-hidden="true">
+      <div class="cube">
+        <div class="face f1">🔒</div><div class="face f2">📘</div><div class="face f3">🛡️</div>
+        <div class="face f4">🧠</div><div class="face f5">✨</div><div class="face f6">📝</div>
+      </div>
+    </div>
+  </header>
+
+  <div class="summary"><strong>Summary:</strong> AI Study Notes only processes the lecture transcript you provide to generate study notes in your chosen language, and tracks basic usage/device limits to keep Free and Pro plans fair. We do not sell your personal data.</div>
+
+  <main class="grid">
+    <section class="card">
+      <h2><span>📄</span>1. Information We Process</h2>
+      <ul>
+        <li><strong>Lecture Transcripts &amp; URLs:</strong> When you click <em>Generate Notes</em>, the transcript text (up to 60,000 characters) and optional YouTube link are sent to our backend API so AI can structure notes, timestamps, quick revisions, and key terms.</li>
+        <li><strong>Client &amp; Device Identifier:</strong> A randomly generated local ID (<code>deviceId</code>) is used to track daily free usage (5 notes/day) and enforce the Pro license limit of up to 2 active devices per Pro key.</li>
+        <li><strong>Pro License Key &amp; Usage Counts:</strong> When activating a Pro key, your key and daily usage count are verified against our cloud database so your Pro quota stays accurate across sessions.</li>
+        <li><strong>Local Browser Storage:</strong> Preferences such as your selected notes language, style, saved Pro key, and daily count cache are stored locally in your browser via <code>localStorage</code>.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span>⚙️</span>2. How We Use Information</h2>
+      <p>We use processed data strictly to:</p>
+      <ul>
+        <li>Generate study notes, summaries, glossaries, and PDF/Markdown exports in your selected language.</li>
+        <li>Enforce daily generation limits for Free and Pro users and prevent unauthorized Pro key sharing across excessive devices.</li>
+        <li>Maintain reliability, prevent abuse, and troubleshoot service errors.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span>💳</span>3. Third-Party Services &amp; Payments</h2>
+      <ul>
+        <li><strong>AI &amp; Hosting Infrastructure:</strong> Backend requests are processed through our API server and cloud database infrastructure to generate notes and verify Pro keys.</li>
+        <li><strong>Payments:</strong> International ($5/month) and local Pakistan (Rs. 1,000/month) payments are handled via their respective checkout/payment methods. Payment card details are never stored inside the Chrome extension.</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2><span>🔐</span>4. Data Retention &amp; Security</h2>
+      <p>Lecture transcripts are processed to generate your requested notes rather than published publicly. All communication between the extension and backend API occurs over encrypted HTTPS connections.</p>
+    </section>
+
+    <section class="card">
+      <h2><span>✉️</span>5. Your Choices &amp; Contact</h2>
+      <p>You can clear your saved preferences, Pro key, and local usage data anytime by clearing site/extension storage or removing the extension from Chrome.</p>
+      <p>For support, Pro key inquiries, or privacy questions, contact us at: <a href="mailto:support@dollarmartlayyah.com">support@dollarmartlayyah.com</a></p>
+    </section>
+  </main>
+
+  <div class="footer">
+    <span>AI Study Notes</span>
+    <span><a href="index.html">Home</a></span>
+  </div>
+</div>
+<script>
+(function(){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches||matchMedia('(hover: none)').matches)return;
+  document.querySelectorAll('.card').forEach(function(c){
+    c.addEventListener('pointermove',function(e){
+      var r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+      c.style.transform='rotateX('+(-y*6)+'deg) rotateY('+(x*8)+'deg) translateZ(6px)';
+    });
+    c.addEventListener('pointerleave',function(){c.style.transform=''});
+  });
+})();
+</script>
+</body>
+</html>
